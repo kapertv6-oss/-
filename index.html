@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hakka AI</title>
+
+<style>
+:root {
+  --bg: #140c12;
+  --accent: #ff4d6d;
+  --panel: rgba(255,255,255,.05);
+}
+
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ===== ЗАГРУЗКА ===== */
+#loader {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#140c12; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:28px; font-weight:bold; z-index:1000;
+}
+
+/* ===== УВЕДОМЛЕНИЯ ===== */
+#notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,77,109,0.9);
+  padding: 12px 20px;
+  border-radius: 12px;
+  display: none;
+  color: #fff;
+  font-weight: bold;
+  z-index: 999;
+}
+
+/* ===== ФОН ===== */
+.sparkle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--accent);
+}
+
+/* ===== ПРИЛОЖЕНИЕ ===== */
+.app {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== ХЕДЕР ===== */
+header {
+  padding: 14px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: var(--accent);
+}
+
+/* ===== ЭКРАНЫ ===== */
+.screen {
+  flex: 1;
+  display: none;
+  padding: 15px;
+  overflow-y: auto;
+}
+.screen.active {
+  display: block;
+}
+
+/* ===== КАРТОЧКИ ===== */
+.card {
+  background: var(--panel);
+  padding: 16px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  transition: transform .2s;
+}
+.card:hover {
+  transform: scale(1.02);
+}
+
+/* ===== КНОПКИ ===== */
+button {
+  width: auto;
+  min-width: 100px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform .15s, opacity .15s;
+}
+button:hover { transform: scale(1.04); opacity: 0.95; }
+button:active { transform: scale(0.98); }
+
+/* ===== ЧАТ ===== */
+.chat {
+  display: flex;
+  flex-direction: column;
+}
+.msg {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  animation: fade .3s ease;
+  display: flex;
+  align-items: flex-end;
+}
+.msg .avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.user { background: #2a2a2a; margin-left: auto; }
+.user .avatar { margin-left: 12px; margin-right: 0; }
+.bot { background: rgba(255,77,109,.15); border: 1px solid var(--accent); }
+.bot .avatar { margin-right: 12px; }
+.typing { opacity: .6; font-style: italic; }
+
+.input { display: flex; gap: 8px; margin-top: 10px; }
+input { flex: 1; padding: 12px; border-radius: 12px; border: none; outline: none; }
+
+@keyframes fade { from {opacity:0; transform:translateY(6px)} to {opacity:1; transform:translateY(0)} }
+</style>
+</head>
+
+<body>
+
+<div id="loader">Hakka AI загружается...</div>
+<div id="notification"></div>
+
+<div class="app">
+<header id="header">Hakka AI</header>
+
+<!-- ===== МЕНЮ ===== -->
+<div class="screen active" id="menu">
+  <div class="card"><button onclick="show('characters')">🎭 Персонажи</button></div>
+  <div class="card"><button onclick="show('profile')">👤 Профиль</button></div>
+  <div class="card"><button onclick="show('workshop')">🛠 Мастерская</button></div>
+</div>
+
+<!-- ===== ПЕРСОНАЖИ ===== -->
+<div class="screen" id="characters">
+  <div class="card" onclick="openChat('Риас')">❤️ Риас Гремори</div>
+  <div class="card" onclick="openChat('Конэко')">❄️ Конэко Тодзё</div>
+  <div class="card" onclick="openUserChar()">✨ Мой персонаж</div>
+  <button onclick="show('menu')">⬅ Назад</button>
+</div>
+
+<!-- ===== ПРОФИЛЬ ===== -->
+<div class="screen" id="profile">
+  <div class="card">TG Nick: <b>@user</b></div>
+  <div class="card">ID: <b>123456789</b></div>
+  <div class="card">Retokens: <b id="coins">100</b></div>
+
+  <div class="card">
+    <input id="nickInput" placeholder="Ник для персонажей">
+    <button onclick="saveNick()">Сохранить ник</button>
+  </div>
+  <button onclick="show('menu')">⬅ Назад</button>
+</div>
+
+<!-- ===== ЧАТ ===== -->
+<div class="screen" id="chatScreen">
+  <div class="chat" id="chat"></div>
+  <div class="input">
+    <input id="msg" placeholder="Сообщение...">
+    <button onclick="send()">▶</button>
+  </div>
+  <button onclick="show('characters')">⬅ Назад</button>
+</div>
+
+<!-- ===== МАСТЕРСКАЯ ===== -->
+<div class="screen" id="workshop">
+  <h2>🛠 Мастерская</h2>
+  <div class="card">
+    <input id="charName" placeholder="Имя персонажа">
+    <input id="charMood" placeholder="Настроение/атмосфера">
+    <input id="charAvatar" placeholder="Аватар (URL)">
+    <button onclick="createCharacter()">Создать персонажа (100 Retokens)</button>
+
+    <!-- ===== ПРЕДПРОСМОТР ===== -->
+    <div class="preview" style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px; display:flex; align-items:center; gap:10px;">
+      <div id="previewAvatar" style="width:50px; height:50px; border-radius:50%; background-size:cover;"></div>
+      <div>
+        <div id="previewName" style="font-weight:bold;">Имя</div>
+        <div id="previewMood" style="opacity:0.7; font-size:14px;">Настроение</div>
+      </div>
+    </div>
+
+  </div>
+  <button onclick="show('menu')">⬅ Назад</button>
+</div>
+
+</div>
+
+<script>
+/* ===== ЗАГРУЗКА ===== */
+window.addEventListener('load', ()=>{
+  const loader = document.getElementById('loader');
+  loader.style.transition='opacity 0.6s';
+  loader.style.opacity=0;
+  setTimeout(()=>loader.remove(),600);
+});
+
+/* ===== СОСТОЯНИЕ ===== */
+let userNick = localStorage.getItem('nick') || 'Ты';
+let currentChar = 'Риас';
+
+/* ===== Аватар пользователя из TG ===== */
+let userAvatar = 'https://i.imgur.com/default_user.png'; // fallback
+if(window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url){
+  userAvatar = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
+}
+
+/* ===== УВЕДОМЛЕНИЯ ===== */
+function notify(text,time=2000){
+  const n=document.getElementById('notification');
+  n.textContent=text;
+  n.style.display='block';
+  setTimeout(()=>{n.style.display='none';},time);
+}
+
+/* ===== НАВИГАЦИЯ ===== */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ===== ПРОФИЛЬ ===== */
+function saveNick(){
+  const v=nickInput.value.trim();
+  if(!v) return;
+  userNick=v;
+  localStorage.setItem('nick',v);
+  notify('Ник сохранён!');
+}
+
+/* ===== ОФИЦИАЛЬНЫЕ ПЕРСОНАЖИ ===== */
+const officialChars = {
+  'Риас': { avatar: 'https://i.imgur.com/AkFUZMB.png', theme:'rias' },
+  'Конэко': { avatar: 'https://i.imgur.com/fh2s0yw.png', theme:'koneko' }
+};
+
+/* ===== ЧАТ ===== */
+const chat = document.getElementById('chat');
+
+function addWithAvatar(text,cls,avatar){
+  const d=document.createElement('div');
+  d.className='msg '+cls;
+
+  const av=document.createElement('div');
+  av.className='avatar';
+  av.style.backgroundImage=`url(${avatar})`;
+  d.appendChild(av);
+
+  const txt=document.createElement('div');
+  txt.innerHTML=text;
+  d.appendChild(txt);
+
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function openChat(name){
+  currentChar=name;
+  header.textContent='Hakka AI — '+name;
+  chat.innerHTML='';
+  let data = officialChars[name] || JSON.parse(localStorage.getItem('userCharacter'));
+  if(!data) data={avatar:'https://i.imgur.com/AkFUZMB.png', theme:'rias'};
+  chat.dataset.avatar=data.avatar;
+  setAtmosphere(data.theme);
+  show('chatScreen');
+}
+
+function send(){
+  const t=msg.value.trim();
+  if(!t) return;
+  msg.value='';
+  addWithAvatar(t,'user',userAvatar); // аватар из TG
+
+  const typing=document.createElement('div');
+  typing.className='msg bot typing';
+  typing.textContent=currentChar+' печатает...';
+  chat.appendChild(typing);
+
+  setTimeout(()=>{
+    typing.remove();
+    let data = officialChars[currentChar] || JSON.parse(localStorage.getItem('userCharacter'));
+    const avatar = data?.avatar || 'https://i.imgur.com/AkFUZMB.png';
+    addWithAvatar(`<i>*${currentChar} улыбается*</i><br>${userNick}, ты сказал: «${t}»~`,'bot',avatar);
+  },1200);
+}
+
+/* ===== АТМОСФЕРА ===== */
+function setAtmosphere(t){
+  if(t==='koneko'){ document.documentElement.style.setProperty('--bg','#0e1a22'); document.documentElement.style.setProperty('--accent','#bfefff'); }
+  else if(t==='rias'){ document.documentElement.style.setProperty('--bg','#140c12'); document.documentElement.style.setProperty('--accent','#ff4d6d'); }
+  else{ document.documentElement.style.setProperty('--bg','#2a1018'); document.documentElement.style.setProperty('--accent','#ff99aa'); }
+}
+
+/* ===== ФОН ===== */
+const sparkles=[]; let tx=0,ty=0,mx=0,my=0;
+for(let i=0;i<50;i++){ const s=document.createElement('div'); s.className='sparkle'; const z=Math.random()*3+2; s.style.width=z+'px'; s.style.height=z+'px'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%'; document.body.appendChild(s); sparkles.push({el:s,base:Math.random()*20}); }
+function animate(){ mx+=(tx-mx)*.05; my+=(ty-my)*.05; const t=Date.now()/1000; sparkles.forEach((s,i)=>{ s.el.style.transform=`translate(${Math.sin(t+i)*s.base+mx*20}px,${Math.cos(t+i)*s.base+my*20}px)`; }); requestAnimationFrame(animate); }
+animate();
+document.addEventListener('mousemove',e=>{tx=e.clientX/window.innerWidth-.5; ty=e.clientY/window.innerHeight-.5;});
+document.addEventListener('touchmove',e=>{const t=e.touches[0]; tx=t.clientX/window.innerWidth-.5; ty=t.touches[0].clientY/window.innerHeight-.5;});
+
+/* ===== МАСТЕРСКАЯ ===== */
+const previewAvatar = document.getElementById('previewAvatar');
+const previewName = document.getElementById('previewName');
+const previewMood = document.getElementById('previewMood');
+
+document.getElementById('charName').addEventListener('input', ()=> {
+  previewName.textContent = document.getElementById('charName').value || 'Имя';
+});
+
+document.getElementById('charMood').addEventListener('input', ()=> {
+  previewMood.textContent = document.getElementById('charMood').value || 'Настроение';
+});
+
+document.getElementById('charAvatar').addEventListener('input', ()=> {
+  const url = document.getElementById('charAvatar').value;
+  if(url) previewAvatar.style.backgroundImage = `url(${url})`;
+  else previewAvatar.style.backgroundImage = '';
+});
+
+function createCharacter(){
+  const name=document.getElementById('charName').value.trim();
+  const mood=document.getElementById('charMood').value.trim()||'теплый';
+  const avatar=document.getElementById('charAvatar').value.trim()||'https://i.imgur.com/AkFUZMB.png';
+  if(!name) return notify("Введите имя персонажа!");
+  let coins=parseInt(document.getElementById('coins').textContent);
+  if(coins<100) return notify("Недостаточно Retokens!");
+  document.getElementById('coins').textContent=coins-100;
+  const userChar={name,mood,avatar};
+  localStorage.setItem('userCharacter',JSON.stringify(userChar));
+  notify(`Персонаж ${name} создан! 100 Retokens потрачено!`);
+}
+
+function openUserChar(){
+  const data=JSON.parse(localStorage.getItem('userCharacter'));
+  if(!data) return notify("У вас пока нет своего персонажа.");
+  currentChar=data.name;
+  header.textContent='Hakka AI — '+data.name;
+  setAtmosphere('user');
+  chat.innerHTML='';
+  show('chatScreen');
+}
+</script>
+
+</body>
+</html>
