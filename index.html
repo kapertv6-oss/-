@@ -202,18 +202,37 @@ function openChat(name){
 }
 
 function send(){
-  const t=document.getElementById('msg').value.trim();
+  const t = document.getElementById('msg').value.trim();
   if(!t) return;
-  document.getElementById('msg').value='';
-  addWithAvatar(t,'user',tgUser.photo_url);
-  const typing=document.createElement('div'); typing.className='msg bot typing'; typing.textContent=currentChar+' печатает...';
+  document.getElementById('msg').value = '';
+  addWithAvatar(t, 'user', tgUser.photo_url);
+
+  const typing = document.createElement('div');
+  typing.className = 'msg bot typing';
+  typing.textContent = currentChar + ' печатает...';
   chat.appendChild(typing);
-  setTimeout(()=>{
+  chat.scrollTop = chat.scrollHeight;
+
+  // ======= ЛОКАЛЬНЫЙ HAKKA AI =======
+  fetch("https://ТВОЙ_NGROK_URL/chat", { // <-- ВСТАВЬ СВОЙ NGROK URL
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: t,
+      user: userNick
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
     typing.remove();
-    let data=officialChars[currentChar]||JSON.parse(localStorage.getItem('userCharacter'));
-    const avatar=data?.avatar||'https://i.imgur.com/AkFUZMB.png';
-    addWithAvatar(`<i>*${currentChar} улыбается*</i><br>${userNick}, ты сказал: «${t}»~`,'bot',avatar);
-  },1200);
+    const avatar = (officialChars[currentChar]?.avatar) || (JSON.parse(localStorage.getItem('userCharacter'))?.avatar) || 'https://i.imgur.com/AkFUZMB.png';
+    addWithAvatar(data.reply, 'bot', avatar);
+  })
+  .catch(err => {
+    typing.remove();
+    addWithAvatar(`<i>Ошибка сервера: не удалось получить ответ ИИ</i>`, 'bot', 'https://i.imgur.com/AkFUZMB.png');
+    console.error(err);
+  });
 }
 
 /* ===== АТМОСФЕРА ===== */
