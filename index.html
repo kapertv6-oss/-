@@ -105,11 +105,9 @@ window.addEventListener('load',()=>{
   setTimeout(()=>loader.remove(),600);
 });
 
-/* ===== ПОЛЬЗОВАТЕЛЬ ===== */
 let userNick = localStorage.getItem('nick') || 'Ты';
 let currentChar = 'Риас';
 
-/* ===== TG ДАННЫЕ ===== */
 let tgUser = {id:'неизвестно',username:userNick,first_name:'Ты',photo_url:'https://i.imgur.com/default_user.png'};
 if(window.Telegram?.WebApp?.initDataUnsafe?.user){
   const u = window.Telegram.WebApp.initDataUnsafe.user;
@@ -119,7 +117,6 @@ if(window.Telegram?.WebApp?.initDataUnsafe?.user){
   if(u.photo_url) tgUser.photo_url = u.photo_url;
 }
 
-/* ===== ПРОФИЛЬ ===== */
 function updateProfile(){
   let coins = parseInt(localStorage.getItem('coins')) || 100;
   document.getElementById('coins')?.remove();
@@ -136,7 +133,6 @@ function updateProfile(){
   `;
 }
 
-/* ===== УВЕДОМЛЕНИЯ ===== */
 function notify(text,time=2000){
   const n=document.getElementById('notification');
   n.textContent=text;
@@ -144,14 +140,12 @@ function notify(text,time=2000){
   setTimeout(()=>{n.style.display='none';},time);
 }
 
-/* ===== НАВИГАЦИЯ ===== */
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id==='profile') updateProfile();
 }
 
-/* ===== СОХРАНЕНИЕ НИКА ===== */
 function saveNick(){
   const v=document.getElementById('nickInput').value.trim();
   if(!v) return;
@@ -160,7 +154,6 @@ function saveNick(){
   notify('Ник сохранён!');
 }
 
-/* ===== ПРОМОКОДЫ ===== */
 function applyPromo(){
   const code=document.getElementById('promoInput').value.trim();
   if(!code) return notify("Введите промокод!");
@@ -175,10 +168,8 @@ function applyPromo(){
   } else notify("Неверный промокод!");
 }
 
-/* ===== ПЕРСОНАЖИ ===== */
 const officialChars={'Риас':{avatar:'https://i.imgur.com/AkFUZMB.png',theme:'rias'},'Конэко':{avatar:'https://i.imgur.com/fh2s0yw.png',theme:'koneko'}};
 
-/* ===== ЧАТ ===== */
 const chat=document.getElementById('chat');
 function addWithAvatar(text,cls,avatar){
   const d=document.createElement('div');
@@ -201,6 +192,7 @@ function openChat(name){
   show('chatScreen');
 }
 
+// ====== ВАЖНО: рабочий чат с локальным Hakka AI через ngrok ======
 function send(){
   const t = document.getElementById('msg').value.trim();
   if(!t) return;
@@ -213,8 +205,7 @@ function send(){
   chat.appendChild(typing);
   chat.scrollTop = chat.scrollHeight;
 
-  // ======= ЛОКАЛЬНЫЙ HAKKA AI =======
-  fetch("https://ТВОЙ_NGROK_URL/chat", { // <-- ВСТАВЬ СВОЙ NGROK URL
+  fetch("https://nonappropriative-dortha-quantally.ngrok-free.dev/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -235,14 +226,14 @@ function send(){
   });
 }
 
-/* ===== АТМОСФЕРА ===== */
+// ====== ФОН, мастерская и остальное оставляем без изменений ======
 function setAtmosphere(t){
   if(t==='koneko'){ document.documentElement.style.setProperty('--bg','#0e1a22'); document.documentElement.style.setProperty('--accent','#bfefff'); }
   else if(t==='rias'){ document.documentElement.style.setProperty('--bg','#140c12'); document.documentElement.style.setProperty('--accent','#ff4d6d'); }
   else{ document.documentElement.style.setProperty('--bg','#2a1018'); document.documentElement.style.setProperty('--accent','#ff99aa'); }
 }
 
-/* ===== ФОН: звездочки ===== */
+/* Фон звездочки */
 const sparkles=[]; let tx=0,ty=0,mx=0,my=0;
 for(let i=0;i<50;i++){ const s=document.createElement('div'); s.className='sparkle'; const z=Math.random()*3+2; s.style.width=z+'px'; s.style.height=z+'px'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%'; document.body.appendChild(s); sparkles.push({el:s,base:Math.random()*20}); }
 function animate(){ mx+=(tx-mx)*.05; my+=(ty-my)*.05; const t=Date.now()/1000; sparkles.forEach((s,i)=>{ s.el.style.transform=`translate(${Math.sin(t+i)*s.base+mx*20}px,${Math.cos(t+i)*s.base+my*20}px)`; }); requestAnimationFrame(animate); }
@@ -250,7 +241,7 @@ animate();
 document.addEventListener('mousemove',e=>{tx=e.clientX/window.innerWidth-.5; ty=e.clientY/window.innerHeight-.5;});
 document.addEventListener('touchmove',e=>{const t=e.touches[0]; tx=t.clientX/window.innerWidth-.5; ty=e.touches[0].clientY/window.innerHeight-.5;});
 
-/* ===== МАСТЕРСКАЯ ===== */
+/* ===== Мастерская ===== */
 const previewAvatar=document.getElementById('previewAvatar');
 const previewName=document.getElementById('previewName');
 const previewMood=document.getElementById('previewMood');
