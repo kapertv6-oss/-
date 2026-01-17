@@ -12,145 +12,56 @@
   --panel: rgba(255,255,255,.05);
 }
 
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
+* { box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+body { margin:0; background:var(--bg); color:#fff; overflow:hidden; }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: #fff;
-  overflow: hidden;
-}
-
-/* ===== ЗАГРУЗКА ===== */
 #loader {
   position:fixed; top:0; left:0; width:100%; height:100%;
   background:#140c12; display:flex; align-items:center; justify-content:center;
   color:#fff; font-size:28px; font-weight:bold; z-index:1000;
 }
 
-/* ===== УВЕДОМЛЕНИЯ ===== */
 #notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255,77,109,0.9);
-  padding: 12px 20px;
-  border-radius: 12px;
-  display: none;
-  color: #fff;
-  font-weight: bold;
-  z-index: 999;
+  position:fixed; top:20px; left:50%; transform:translateX(-50%);
+  background:rgba(255,77,109,0.9); padding:12px 20px; border-radius:12px;
+  display:none; color:#fff; font-weight:bold; z-index:999;
 }
 
-/* ===== ФОН ===== */
-.sparkle {
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  background: var(--accent);
-}
+.sparkle { position:fixed; border-radius:50%; pointer-events:none; background:var(--accent); }
 
-/* ===== ПРИЛОЖЕНИЕ ===== */
-.app {
-  position: relative;
-  z-index: 2;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+.app { position:relative; z-index:2; height:100vh; display:flex; flex-direction:column; }
+header { padding:14px; text-align:center; font-size:22px; font-weight:bold; color:var(--accent); }
+.screen { flex:1; display:none; padding:15px; overflow-y:auto; }
+.screen.active { display:block; }
 
-/* ===== ХЕДЕР ===== */
-header {
-  padding: 14px;
-  text-align: center;
-  font-size: 22px;
-  font-weight: bold;
-  color: var(--accent);
-}
+.card { background:var(--panel); padding:16px; border-radius:16px; margin-bottom:12px; transition: transform .2s; }
+.card:hover { transform:scale(1.02); }
 
-/* ===== ЭКРАНЫ ===== */
-.screen {
-  flex: 1;
-  display: none;
-  padding: 15px;
-  overflow-y: auto;
-}
-.screen.active {
-  display: block;
-}
-
-/* ===== КАРТОЧКИ ===== */
-.card {
-  background: var(--panel);
-  padding: 16px;
-  border-radius: 16px;
-  margin-bottom: 12px;
-  transition: transform .2s;
-}
-.card:hover {
-  transform: scale(1.02);
-}
-
-/* ===== КНОПКИ ===== */
 button {
-  width: auto;
-  min-width: 100px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform .15s, opacity .15s;
+  min-width:100px; padding:10px 14px; border-radius:12px; border:none;
+  background:var(--accent); color:#fff; font-size:14px; font-weight:500;
+  cursor:pointer; transition: transform .15s, opacity .15s;
 }
-button:hover { transform: scale(1.04); opacity: 0.95; }
-button:active { transform: scale(0.98); }
+button:hover { transform:scale(1.04); opacity:.95; }
+button:active { transform:scale(0.98); }
 
-/* ===== ЧАТ ===== */
-.chat {
-  display: flex;
-  flex-direction: column;
-}
-.msg {
-  max-width: 80%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  margin-bottom: 10px;
-  animation: fade .3s ease;
-  display: flex;
-  align-items: flex-end;
-}
-.msg .avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-size: cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-.user { background: #2a2a2a; margin-left: auto; }
-.user .avatar { margin-left: 12px; margin-right: 0; }
-.bot { background: rgba(255,77,109,.15); border: 1px solid var(--accent); }
-.bot .avatar { margin-right: 12px; }
-.typing { opacity: .6; font-style: italic; }
+.chat { display:flex; flex-direction:column; }
+.msg { max-width:80%; padding:10px 14px; border-radius:14px; margin-bottom:10px; animation:fade .3s ease; display:flex; align-items:flex-end; }
+.msg .avatar { width:30px; height:30px; border-radius:50%; background-size:cover; display:flex; align-items:center; justify-content:center; font-size:20px; }
+.user { background:#2a2a2a; margin-left:auto; }
+.user .avatar { margin-left:12px; margin-right:0; }
+.bot { background:rgba(255,77,109,.15); border:1px solid var(--accent); }
+.bot .avatar { margin-right:12px; }
+.typing { opacity:.6; font-style:italic; }
 
-.input { display: flex; gap: 8px; margin-top: 10px; }
-input { flex: 1; padding: 12px; border-radius: 12px; border: none; outline: none; }
+.input { display:flex; gap:8px; margin-top:10px; }
+input { flex:1; padding:12px; border-radius:12px; border:none; outline:none; }
 
 @keyframes fade { from {opacity:0; transform:translateY(6px)} to {opacity:1; transform:translateY(0)} }
 </style>
 </head>
 
 <body>
-
 <div id="loader">Hakka AI загружается...</div>
 <div id="notification"></div>
 
@@ -174,15 +85,7 @@ input { flex: 1; padding: 12px; border-radius: 12px; border: none; outline: none
 
 <!-- ===== ПРОФИЛЬ ===== -->
 <div class="screen" id="profile">
-  <div class="card">TG Nick: <b>@user</b></div>
-  <div class="card">ID: <b>123456789</b></div>
-  <div class="card">Retokens: <b id="coins">100</b></div>
-
-  <div class="card">
-    <input id="nickInput" placeholder="Ник для персонажей">
-    <button onclick="saveNick()">Сохранить ник</button>
-  </div>
-  <button onclick="show('menu')">⬅ Назад</button>
+  <div class="card" id="profileContent"></div>
 </div>
 
 <!-- ===== ЧАТ ===== -->
@@ -204,7 +107,6 @@ input { flex: 1; padding: 12px; border-radius: 12px; border: none; outline: none
     <input id="charAvatar" placeholder="Аватар (URL)">
     <button onclick="createCharacter()">Создать персонажа (100 Retokens)</button>
 
-    <!-- ===== ПРЕДПРОСМОТР ===== -->
     <div class="preview" style="margin-top:12px; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px; display:flex; align-items:center; gap:10px;">
       <div id="previewAvatar" style="width:50px; height:50px; border-radius:50%; background-size:cover;"></div>
       <div>
@@ -222,20 +124,38 @@ input { flex: 1; padding: 12px; border-radius: 12px; border: none; outline: none
 <script>
 /* ===== ЗАГРУЗКА ===== */
 window.addEventListener('load', ()=>{
-  const loader = document.getElementById('loader');
+  const loader=document.getElementById('loader');
   loader.style.transition='opacity 0.6s';
   loader.style.opacity=0;
   setTimeout(()=>loader.remove(),600);
 });
 
-/* ===== СОСТОЯНИЕ ===== */
+/* ===== ИНИЦИАЛИЗАЦИЯ ===== */
 let userNick = localStorage.getItem('nick') || 'Ты';
 let currentChar = 'Риас';
 
-/* ===== Аватар пользователя из TG ===== */
-let userAvatar = 'https://i.imgur.com/default_user.png'; // fallback
-if(window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url){
-  userAvatar = window.Telegram.WebApp.initDataUnsafe.user.photo_url;
+/* ===== ДАННЫЕ ТЕЛЕГРАМ ===== */
+let tgUser = { id:'неизвестно', username:'неизвестно', first_name:'неизвестно', photo_url:'https://i.imgur.com/default_user.png' };
+if(window.Telegram?.WebApp?.initDataUnsafe?.user){
+    const u = window.Telegram.WebApp.initDataUnsafe.user;
+    tgUser.id = u.id;
+    tgUser.username = u.username || 'неизвестно';
+    tgUser.first_name = u.first_name || 'неизвестно';
+    if(u.photo_url) tgUser.photo_url = u.photo_url;
+}
+
+/* ===== ПРОФИЛЬ ===== */
+function updateProfile(){
+  document.getElementById('profileContent').innerHTML = `
+    <div class="card">TG Nick: <b>${tgUser.username}</b></div>
+    <div class="card">TG ID: <b>${tgUser.id}</b></div>
+    <div class="card">Retokens: <b id="coins">100</b></div>
+    <div class="card">
+        <input id="nickInput" placeholder="Ник для персонажей">
+        <button onclick="saveNick()">Сохранить ник</button>
+    </div>
+    <button onclick="show('menu')">⬅ Назад</button>
+  `;
 }
 
 /* ===== УВЕДОМЛЕНИЯ ===== */
@@ -250,11 +170,12 @@ function notify(text,time=2000){
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  if(id==='profile') updateProfile();
 }
 
-/* ===== ПРОФИЛЬ ===== */
+/* ===== СОХРАНЕНИЕ НИКА ===== */
 function saveNick(){
-  const v=nickInput.value.trim();
+  const v=document.getElementById('nickInput').value.trim();
   if(!v) return;
   userNick=v;
   localStorage.setItem('nick',v);
@@ -263,8 +184,8 @@ function saveNick(){
 
 /* ===== ОФИЦИАЛЬНЫЕ ПЕРСОНАЖИ ===== */
 const officialChars = {
-  'Риас': { avatar: 'https://i.imgur.com/AkFUZMB.png', theme:'rias' },
-  'Конэко': { avatar: 'https://i.imgur.com/fh2s0yw.png', theme:'koneko' }
+  'Риас': { avatar:'https://i.imgur.com/AkFUZMB.png', theme:'rias' },
+  'Конэко': { avatar:'https://i.imgur.com/fh2s0yw.png', theme:'koneko' }
 };
 
 /* ===== ЧАТ ===== */
@@ -299,10 +220,10 @@ function openChat(name){
 }
 
 function send(){
-  const t=msg.value.trim();
+  const t=document.getElementById('msg').value.trim();
   if(!t) return;
-  msg.value='';
-  addWithAvatar(t,'user',userAvatar); // аватар из TG
+  document.getElementById('msg').value='';
+  addWithAvatar(t,'user',tgUser.photo_url); // аватарка из Telegram
 
   const typing=document.createElement('div');
   typing.className='msg bot typing';
@@ -374,6 +295,6 @@ function openUserChar(){
   show('chatScreen');
 }
 </script>
-
 </body>
 </html>
+
