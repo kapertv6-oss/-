@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hakka AI</title>
 <style>
-:root {
-  --bg: #140c12;
-  --accent: #ff4d6d;
-  --panel: rgba(255,255,255,.05);
-}
+:root {--bg:#140c12;--accent:#ff4d6d;--panel:rgba(255,255,255,.05);}
 *{box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{margin:0;background:var(--bg);color:#fff;overflow:hidden;}
 #loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#140c12;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:bold;z-index:1000;}
@@ -62,6 +58,10 @@ input{flex:1;padding:12px;border-radius:12px;border:none;outline:none;}
 <!-- ПРОФИЛЬ -->
 <div class="screen" id="profile">
   <div class="card" id="profileContent"></div>
+  <div class="card">
+    <input id="promoInput" placeholder="Введите промокод">
+    <button onclick="applyPromo()">Активировать</button>
+  </div>
 </div>
 
 <!-- ЧАТ -->
@@ -105,41 +105,38 @@ window.addEventListener('load',()=>{
   setTimeout(()=>loader.remove(),600);
 });
 
+/* ===== ПОЛЬЗОВАТЕЛЬ ===== */
 let userNick = localStorage.getItem('nick') || 'Ты';
 let currentChar = 'Риас';
 
 /* ===== TG ДАННЫЕ ===== */
-let tgUser = {
-    id: 'неизвестно',
-    username: userNick,
-    first_name: 'Ты',
-    photo_url: 'https://i.imgur.com/default_user.png'
-};
+let tgUser = {id:'неизвестно',username:userNick,first_name:'Ты',photo_url:'https://i.imgur.com/default_user.png'};
 if(window.Telegram?.WebApp?.initDataUnsafe?.user){
-    const u = window.Telegram.WebApp.initDataUnsafe.user;
-    tgUser.id = u.id;
-    tgUser.username = u.username || userNick;
-    tgUser.first_name = u.first_name || userNick;
-    if(u.photo_url) tgUser.photo_url = u.photo_url;
+  const u = window.Telegram.WebApp.initDataUnsafe.user;
+  tgUser.id = u.id;
+  tgUser.username = u.username || userNick;
+  tgUser.first_name = u.first_name || userNick;
+  if(u.photo_url) tgUser.photo_url = u.photo_url;
 }
 
 /* ===== ПРОФИЛЬ ===== */
 function updateProfile(){
+  let coins = parseInt(localStorage.getItem('coins')) || 100;
+  document.getElementById('coins')?.remove();
   document.getElementById('profileContent').innerHTML=`
     <div class="card">TG Nick: <b>${tgUser.username}</b></div>
     <div class="card">TG ID: <b>${tgUser.id}</b></div>
     <div class="card">Аватарка:</div>
     <div class="card"><img src="${tgUser.photo_url}" style="width:50px;border-radius:50%"></div>
-    <div class="card">Retokens: <b id="coins">100</b></div>
+    <div class="card">Retokens: <b id="coins">${coins}</b></div>
     <div class="card">
       <input id="nickInput" placeholder="Ник для персонажей">
       <button onclick="saveNick()">Сохранить ник</button>
     </div>
-    <button onclick="show('menu')">⬅ Назад</button>
   `;
 }
 
-/* УВЕДОМЛЕНИЯ */
+/* ===== УВЕДОМЛЕНИЯ ===== */
 function notify(text,time=2000){
   const n=document.getElementById('notification');
   n.textContent=text;
@@ -147,14 +144,14 @@ function notify(text,time=2000){
   setTimeout(()=>{n.style.display='none';},time);
 }
 
-/* НАВИГАЦИЯ */
+/* ===== НАВИГАЦИЯ ===== */
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id==='profile') updateProfile();
 }
 
-/* СОХРАНЕНИЕ НИКА */
+/* ===== СОХРАНЕНИЕ НИКА ===== */
 function saveNick(){
   const v=document.getElementById('nickInput').value.trim();
   if(!v) return;
@@ -163,26 +160,34 @@ function saveNick(){
   notify('Ник сохранён!');
 }
 
-/* ОФИЦИАЛЬНЫЕ ПЕРСОНАЖИ */
-const officialChars={
-  'Риас':{avatar:'https://i.imgur.com/AkFUZMB.png',theme:'rias'},
-  'Конэко':{avatar:'https://i.imgur.com/fh2s0yw.png',theme:'koneko'}
-};
+/* ===== ПРОМОКОДЫ ===== */
+function applyPromo(){
+  const code=document.getElementById('promoInput').value.trim();
+  if(!code) return notify("Введите промокод!");
+  const promoCodes={ "Hakka":25, "Arabchik":25 };
+  let coins=parseInt(document.getElementById('coins').textContent)||0;
+  if(promoCodes[code]){
+    coins+=promoCodes[code];
+    document.getElementById('coins').textContent=coins;
+    localStorage.setItem('coins',coins);
+    notify(`Промокод ${code} активирован! +${promoCodes[code]} Retokens`);
+    document.getElementById('promoInput').value='';
+  } else notify("Неверный промокод!");
+}
 
-/* ЧАТ */
+/* ===== ПЕРСОНАЖИ ===== */
+const officialChars={'Риас':{avatar:'https://i.imgur.com/AkFUZMB.png',theme:'rias'},'Конэко':{avatar:'https://i.imgur.com/fh2s0yw.png',theme:'koneko'}};
+
+/* ===== ЧАТ ===== */
 const chat=document.getElementById('chat');
 function addWithAvatar(text,cls,avatar){
   const d=document.createElement('div');
   d.className='msg '+cls;
-  const av=document.createElement('div');
-  av.className='avatar';
-  av.style.backgroundImage=`url(${avatar})`;
+  const av=document.createElement('div'); av.className='avatar'; av.style.backgroundImage=`url(${avatar})`;
   d.appendChild(av);
-  const txt=document.createElement('div');
-  txt.innerHTML=text;
+  const txt=document.createElement('div'); txt.innerHTML=text;
   d.appendChild(txt);
-  chat.appendChild(d);
-  chat.scrollTop=chat.scrollHeight;
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
 }
 
 function openChat(name){
@@ -201,9 +206,7 @@ function send(){
   if(!t) return;
   document.getElementById('msg').value='';
   addWithAvatar(t,'user',tgUser.photo_url);
-  const typing=document.createElement('div');
-  typing.className='msg bot typing';
-  typing.textContent=currentChar+' печатает...';
+  const typing=document.createElement('div'); typing.className='msg bot typing'; typing.textContent=currentChar+' печатает...';
   chat.appendChild(typing);
   setTimeout(()=>{
     typing.remove();
@@ -213,14 +216,14 @@ function send(){
   },1200);
 }
 
-/* АТМОСФЕРА */
+/* ===== АТМОСФЕРА ===== */
 function setAtmosphere(t){
   if(t==='koneko'){ document.documentElement.style.setProperty('--bg','#0e1a22'); document.documentElement.style.setProperty('--accent','#bfefff'); }
   else if(t==='rias'){ document.documentElement.style.setProperty('--bg','#140c12'); document.documentElement.style.setProperty('--accent','#ff4d6d'); }
   else{ document.documentElement.style.setProperty('--bg','#2a1018'); document.documentElement.style.setProperty('--accent','#ff99aa'); }
 }
 
-/* ФОН: звездочки */
+/* ===== ФОН: звездочки ===== */
 const sparkles=[]; let tx=0,ty=0,mx=0,my=0;
 for(let i=0;i<50;i++){ const s=document.createElement('div'); s.className='sparkle'; const z=Math.random()*3+2; s.style.width=z+'px'; s.style.height=z+'px'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%'; document.body.appendChild(s); sparkles.push({el:s,base:Math.random()*20}); }
 function animate(){ mx+=(tx-mx)*.05; my+=(ty-my)*.05; const t=Date.now()/1000; sparkles.forEach((s,i)=>{ s.el.style.transform=`translate(${Math.sin(t+i)*s.base+mx*20}px,${Math.cos(t+i)*s.base+my*20}px)`; }); requestAnimationFrame(animate); }
@@ -228,7 +231,7 @@ animate();
 document.addEventListener('mousemove',e=>{tx=e.clientX/window.innerWidth-.5; ty=e.clientY/window.innerHeight-.5;});
 document.addEventListener('touchmove',e=>{const t=e.touches[0]; tx=t.clientX/window.innerWidth-.5; ty=e.touches[0].clientY/window.innerHeight-.5;});
 
-/* МАСТЕРСКАЯ */
+/* ===== МАСТЕРСКАЯ ===== */
 const previewAvatar=document.getElementById('previewAvatar');
 const previewName=document.getElementById('previewName');
 const previewMood=document.getElementById('previewMood');
@@ -244,6 +247,7 @@ function createCharacter(){
   let coins=parseInt(document.getElementById('coins').textContent);
   if(coins<100) return notify("Недостаточно Retokens!");
   document.getElementById('coins').textContent=coins-100;
+  localStorage.setItem('coins',coins-100);
   const userChar={name,mood,avatar};
   localStorage.setItem('userCharacter',JSON.stringify(userChar));
   notify(`Персонаж ${name} создан! 100 Retokens потрачено!`);
