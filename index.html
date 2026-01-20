@@ -2,281 +2,280 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<title>HAKKA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hakka AI</title>
 <style>
-:root {--bg:#140c12;--accent:#ff4d6d;--panel:rgba(255,255,255,.05);}
-*{box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{margin:0;background:var(--bg);color:#fff;overflow:hidden;}
-#loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#140c12;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:bold;z-index:1000;}
-#notification{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(255,77,109,0.9);padding:12px 20px;border-radius:12px;display:none;color:#fff;font-weight:bold;z-index:999;}
-.sparkle{position:fixed;border-radius:50%;pointer-events:none;background:var(--accent);}
-.app{position:relative;z-index:2;height:100vh;display:flex;flex-direction:column;}
-header{padding:14px;text-align:center;font-size:22px;font-weight:bold;color:var(--accent);}
-.screen{flex:1;display:none;padding:15px;overflow-y:auto;}
+:root{
+  --bg:#0b0d14;
+  --neon:#ff4d6d;
+  --text:#f2f2f2;
+  --card1:#161a2a;
+  --card2:#0f1220;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:radial-gradient(circle at top,#14182a,var(--bg));
+  color:var(--text);
+  min-height:100vh;
+  overflow-y:auto;
+}
+
+/* НЕОНОВЫЙ СКРОЛЛ */
+body::-webkit-scrollbar { width:8px; }
+body::-webkit-scrollbar-track { background:#0b0d14; border-radius:8px; }
+body::-webkit-scrollbar-thumb { background:var(--neon); border-radius:8px; transition:0.3s; }
+body::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
+body { scrollbar-width: thin; scrollbar-color: var(--neon) #0b0d14; }
+
+.characters-wrapper::-webkit-scrollbar { width:6px; }
+.characters-wrapper::-webkit-scrollbar-track { background:#0b0d14; border-radius:6px; }
+.characters-wrapper::-webkit-scrollbar-thumb { background:var(--neon); border-radius:6px; }
+.characters-wrapper::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
+
+/* Частицы */
+.particle{
+  position:absolute;
+  width:4px;height:4px;
+  background:var(--neon);
+  border-radius:50%;
+  opacity:.6;
+  animation: float 14s linear infinite;
+}
+@keyframes float{
+  from{transform:translateY(110vh);}
+  to{transform:translateY(-10vh);}
+}
+
+/* Контейнер */
+.app{
+  max-width:420px;
+  margin:auto;
+  padding:16px;
+}
+
+/* Экраны */
+.screen{display:none;animation:fade .3s ease;}
 .screen.active{display:block;}
-.card{background:var(--panel);padding:16px;border-radius:16px;margin-bottom:12px;transition:transform .2s;}
-.card:hover{transform:scale(1.02);}
-button{min-width:100px;padding:10px 14px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:transform .15s,opacity .15s;}
-button:hover{transform:scale(1.04);opacity:.95;}
-button:active{transform:scale(0.98);}
-.chat{display:flex;flex-direction:column;}
-.msg{max-width:80%;padding:10px 14px;border-radius:14px;margin-bottom:10px;animation:fade .3s ease;display:flex;align-items:flex-end;}
-.msg .avatar{width:30px;height:30px;border-radius:50%;background-size:cover;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.user{background:#2a2a2a;margin-left:auto;}
-.user .avatar{margin-left:12px;margin-right:0;}
-.bot{background:rgba(255,77,109,.15);border:1px solid var(--accent);}
-.bot .avatar{margin-right:12px;}
-.typing{opacity:.6;font-style:italic;}
-.input{display:flex;gap:8px;margin-top:10px;}
-input{flex:1;padding:12px;border-radius:12px;border:none;outline:none;}
-@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;}
+}
+
+/* Заголовки */
+.title{
+  text-align:center;
+  font-size:24px;
+  font-weight:700;
+  color:var(--neon);
+  margin-bottom:16px;
+}
+
+/* Карточки */
+.card{
+  background:linear-gradient(180deg,var(--card1),var(--card2));
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+}
+
+/* Кнопки */
+button{
+  background:var(--neon);
+  border:none;
+  color:white;
+  padding:10px;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  width:100%;
+}
+
+/* Inputs */
+input,textarea{
+  width:100%;
+  margin-top:8px;
+  padding:8px;
+  border-radius:10px;
+  border:none;
+  background:#0b0d18;
+  color:white;
+}
+textarea{resize:none;height:70px}
+
+/* Профиль */
+.profile-row{
+  display:flex;
+  justify-content:space-between;
+  margin:10px 0;
+}
+.token{color:var(--neon);font-weight:700}
+
+/* Персонажи */
+.characters-wrapper{
+  max-height:65vh;
+  overflow-y:auto;
+  padding-right:6px;
+}
+.characters-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.char-card{text-align:center}
+.avatar{
+  width:60px;height:60px;
+  border-radius:50%;
+  margin:0 auto 8px;
+  background-size:cover;
+  background-position:center;
+  border:2px solid var(--neon);
+}
+.char-card p{
+  font-size:13px;
+  opacity:.85;
+  line-height:1.3;
+}
 </style>
 </head>
 <body>
-<div id="loader">Hakka AI загружается...</div>
-<div id="notification"></div>
+
+<script>
+for(let i=0;i<50;i++){
+  const p=document.createElement("div");
+  p.className="particle";
+  p.style.left=Math.random()*100+"vw";
+  p.style.animationDuration=10+Math.random()*10+"s";
+  p.style.opacity=Math.random();
+  document.body.appendChild(p);
+}
+</script>
 
 <div class="app">
-<header id="header">Hakka AI</header>
 
 <!-- МЕНЮ -->
-<div class="screen active" id="menu">
-  <div class="card"><button onclick="show('characters')">🎭 Персонажи</button></div>
-  <div class="card"><button onclick="show('profile')">👤 Профиль</button></div>
-  <div class="card"><button onclick="show('workshop')">🛠 Мастерская</button></div>
-</div>
-
-<!-- ПЕРСОНАЖИ -->
-<div class="screen" id="characters">
-  <div class="card" onclick="openChat('Риас')">❤️ Риас Гремори</div>
-  <div class="card" onclick="openChat('Конэко')">❄️ Конэко Тодзё</div>
-  <div class="card" onclick="openUserChar()">✨ Мой персонаж</div>
-  <button onclick="show('menu')">⬅ Назад</button>
+<div id="menu" class="screen active">
+  <div class="title">Hakka AI</div>
+  <div class="card"><button onclick="openProfile()">👤 Профиль</button></div>
+  <div class="card"><button onclick="openCharacters()">🎮 Персонажи</button></div>
+  <div class="card"><button onclick="openWorkshop()">⚒ Мастерская</button></div>
 </div>
 
 <!-- ПРОФИЛЬ -->
-<div class="screen" id="profile">
-  <div class="card" id="profileContent"></div>
+<div id="profile" class="screen">
+  <div class="title">Профиль</div>
+  <input id="nickname" placeholder="Ник пользователя">
+  <div class="profile-row">
+    <span>Токены</span>
+    <span class="token" id="tokens">0</span>
+  </div>
+  <button onclick="saveProfile()">Сохранить</button>
+  <button onclick="goMenu()" style="margin-top:10px;">Назад</button>
 </div>
 
-<!-- ЧАТ -->
-<div class="screen" id="chatScreen">
-  <div class="chat" id="chat"></div>
-  <div class="input">
-    <input id="msg" placeholder="Сообщение...">
-    <button onclick="send()">▶</button>
+<!-- ПЕРСОНАЖИ -->
+<div id="characters" class="screen">
+  <div class="title">Персонажи</div>
+  <div class="characters-wrapper">
+    <div class="characters-grid" id="charactersGrid"></div>
   </div>
-  <button onclick="show('characters')">⬅ Назад</button>
+  <button onclick="goMenu()" style="margin-top:14px;">Назад</button>
 </div>
 
 <!-- МАСТЕРСКАЯ -->
-<div class="screen" id="workshop">
-  <h2>🛠 Мастерская</h2>
+<div id="workshop" class="screen">
+  <div class="title">Мастерская</div>
   <div class="card">
+    <strong>Создание персонажа (100 токенов)</strong>
     <input id="charName" placeholder="Имя персонажа">
-    <input id="charMood" placeholder="Настроение/атмосфера">
-    <input id="charAvatar" placeholder="Аватар (URL)">
-    <button onclick="createCharacter()">Создать персонажа (100 Retokens)</button>
-    <div class="preview" style="margin-top:12px;padding:10px;background:rgba(255,255,255,0.05);border-radius:12px;display:flex;align-items:center;gap:10px;">
-      <div id="previewAvatar" style="width:50px;height:50px;border-radius:50%;background-size:cover;"></div>
-      <div>
-        <div id="previewName" style="font-weight:bold;">Имя</div>
-        <div id="previewMood" style="opacity:0.7;font-size:14px;">Настроение</div>
-      </div>
-    </div>
+    <textarea id="charDesc" placeholder="Описание персонажа"></textarea>
+    <input id="charAvatar" placeholder="URL аватарки">
+    <button onclick="createCharacter()" style="margin-top:10px;">Создать</button>
   </div>
-  <button onclick="show('menu')">⬅ Назад</button>
+  <button onclick="goMenu()">Назад</button>
 </div>
 
 </div>
 
 <script>
-window.addEventListener('load',()=>{
-  const loader=document.getElementById('loader');
-  loader.style.transition='opacity 0.6s';
-  loader.style.opacity=0;
-  setTimeout(()=>loader.remove(),600);
-});
+const canonChars = [
+  {name:"Алукард",desc:"Древний бессмертный вампир.",avatar:"https://i.imgur.com/7Qp4FZP.jpg"},
+  {name:"Серас Виктория",desc:"Сильная и человечная вампирша.",avatar:"https://i.imgur.com/Jk0yJYF.jpg"},
+  {name:"Интегра Хеллсинг",desc:"Жёсткий лидер Хеллсинга.",avatar:"https://i.imgur.com/3Jk6gOQ.jpg"},
+  {name:"Риас Гремори",desc:"Харизматичная демонесса.",avatar:"https://i.imgur.com/BH4kG3Y.jpg"},
+  {name:"Акено Химэдзима",desc:"Опасная жрица молний.",avatar:"https://i.imgur.com/6c0Z5hZ.jpg"},
+  {name:"Лойд Форджер",desc:"Хладнокровный шпион.",avatar:"https://i.imgur.com/9U5p4Gk.jpg"},
+  {name:"Йор Форджер",desc:"Смертоносная убийца.",avatar:"https://i.imgur.com/HLz7WZ9.jpg"}
+];
 
-/* ===== ПОЛЬЗОВАТЕЛЬ ===== */
-let userNick = localStorage.getItem('nick') || 'Ты';
-let currentChar = 'Риас';
+const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || {
+  nick:"Игрок", tokens:100
+};
 
-/* ===== TG ДАННЫЕ ===== */
-let tgUser = {id:'неизвестно',username:userNick,first_name:'Ты',photo_url:'https://i.imgur.com/default_user.png'};
-if(window.Telegram?.WebApp?.initDataUnsafe?.user){
-  const u = window.Telegram.WebApp.initDataUnsafe.user;
-  tgUser.id = u.id;
-  tgUser.username = u.username || userNick;
-  tgUser.first_name = u.first_name || userNick;
-  if(u.photo_url) tgUser.photo_url = u.photo_url;
+function getUserChars(){
+  return JSON.parse(localStorage.getItem("customChars_"+profile.nick)) || [];
 }
 
-/* ===== ПРОФИЛЬ ===== */
-function updateProfile(){
-  let coins = parseInt(localStorage.getItem('coins')) || 100;
-  document.getElementById('coins')?.remove();
-  document.getElementById('profileContent').innerHTML=`
-    <div class="card">TG Nick: <b>${tgUser.username}</b></div>
-    <div class="card">TG ID: <b>${tgUser.id}</b></div>
-    <div class="card">Аватарка:</div>
-    <div class="card"><img src="${tgUser.photo_url}" style="width:50px;border-radius:50%"></div>
-    <div class="card">Retokens: <b id="coins">${coins}</b></div>
-    <div class="card">
-      <input id="nickInput" placeholder="Ник для персонажей">
-      <button onclick="saveNick()">Сохранить ник</button>
-    </div>
-    <div class="card">
-      <input id="promoInput" placeholder="Введите промокод">
-      <button onclick="applyPromo()">Активировать</button>
-    </div>
-  `;
+function saveUserChars(chars){
+  localStorage.setItem("customChars_"+profile.nick, JSON.stringify(chars));
 }
 
-/* ===== УВЕДОМЛЕНИЯ ===== */
-function notify(text,time=2000){
-  const n=document.getElementById('notification');
-  n.textContent=text;
-  n.style.display='block';
-  setTimeout(()=>{n.style.display='none';},time);
+function openProfile(){
+  showScreen("profile");
+  nickname.value=profile.nick;
+  tokens.textContent=profile.tokens;
 }
 
-/* ===== НАВИГАЦИЯ ===== */
-function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='profile') updateProfile();
+function saveProfile(){
+  profile.nick=nickname.value||"Игрок";
+  localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+  alert("Профиль сохранён");
 }
 
-/* ===== СОХРАНЕНИЕ НИКА ===== */
-function saveNick(){
-  const v=document.getElementById('nickInput').value.trim();
-  if(!v) return;
-  userNick=v;
-  localStorage.setItem('nick',v);
-  notify('Ник сохранён!');
+function openCharacters(){
+  showScreen("characters");
+  renderCharacters();
 }
 
-/* ===== ПРОМОКОДЫ ===== */
-function applyPromo(){
-  const code=document.getElementById('promoInput').value.trim();
-  if(!code) return notify("Введите промокод!");
-  const promoCodes={ "Hakka":25, "Arabchik":25 };
-  let coins=parseInt(document.getElementById('coins').textContent)||0;
-  if(promoCodes[code]){
-    coins+=promoCodes[code];
-    document.getElementById('coins').textContent=coins;
-    localStorage.setItem('coins',coins);
-    notify(`Промокод ${code} активирован! +${promoCodes[code]} Retokens`);
-    document.getElementById('promoInput').value='';
-  } else notify("Неверный промокод!");
-}
+function openWorkshop(){showScreen("workshop")}
+function goMenu(){showScreen("menu")}
 
-/* ===== ПЕРСОНАЖИ ===== */
-const officialChars={'Риас':{avatar:'https://i.imgur.com/AkFUZMB.png',theme:'rias'},'Конэко':{avatar:'https://i.imgur.com/fh2s0yw.png',theme:'koneko'}};
-
-/* ===== ЧАТ ===== */
-const chat=document.getElementById('chat');
-function addWithAvatar(text,cls,avatar){
-  const d=document.createElement('div');
-  d.className='msg '+cls;
-  const av=document.createElement('div'); av.className='avatar'; av.style.backgroundImage=`url(${avatar})`;
-  d.appendChild(av);
-  const txt=document.createElement('div'); txt.innerHTML=text;
-  d.appendChild(txt);
-  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
-}
-
-function openChat(name){
-  currentChar=name;
-  document.getElementById('header').textContent='Hakka AI — '+name;
-  chat.innerHTML='';
-  let data=officialChars[name]||JSON.parse(localStorage.getItem('userCharacter'));
-  if(!data)data={avatar:'https://i.imgur.com/AkFUZMB.png',theme:'rias'};
-  chat.dataset.avatar=data.avatar;
-  setAtmosphere(data.theme);
-  show('chatScreen');
-}
-
-function send(){
-  const t=document.getElementById('msg').value.trim();
-  if(!t) return;
-  document.getElementById('msg').value='';
-  addWithAvatar(t,'user',tgUser.photo_url);
-
-  const typing=document.createElement('div');
-  typing.className='msg bot typing';
-  typing.textContent=currentChar+' печатает...';
-  chat.appendChild(typing);
-
-  fetch("https://nonappropriative-dortha-quantally.ngrok-free.dev/chat", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      message: t,
-      user: userNick,
-      character: currentChar
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    typing.remove();
-    addWithAvatar(data.reply,'bot',data.avatar);
-  })
-  .catch(err => {
-    typing.remove();
-    addWithAvatar("<i>[Ошибка соединения с сервером]</i>",'bot','https://i.imgur.com/AkFUZMB.png');
-    console.error(err);
+function renderCharacters(){
+  const grid=document.getElementById("charactersGrid");
+  grid.innerHTML="";
+  [...canonChars, ...getUserChars()].forEach(c=>{
+    grid.innerHTML+=`
+      <div class="card char-card">
+        <div class="avatar" style="background-image:url('${c.avatar}')"></div>
+        <strong>${c.name}</strong>
+        <p>${c.desc}</p>
+      </div>`;
   });
 }
 
-/* ===== АТМОСФЕРА ===== */
-function setAtmosphere(t){
-  if(t==='koneko'){ document.documentElement.style.setProperty('--bg','#0e1a22'); document.documentElement.style.setProperty('--accent','#bfefff'); }
-  else if(t==='rias'){ document.documentElement.style.setProperty('--bg','#140c12'); document.documentElement.style.setProperty('--accent','#ff4d6d'); }
-  else{ document.documentElement.style.setProperty('--bg','#2a1018'); document.documentElement.style.setProperty('--accent','#ff99aa'); }
-}
-
-/* ===== ФОН: звездочки ===== */
-const sparkles=[]; let tx=0,ty=0,mx=0,my=0;
-for(let i=0;i<50;i++){ const s=document.createElement('div'); s.className='sparkle'; const z=Math.random()*3+2; s.style.width=z+'px'; s.style.height=z+'px'; s.style.left=Math.random()*100+'%'; s.style.top=Math.random()*100+'%'; document.body.appendChild(s); sparkles.push({el:s,base:Math.random()*20}); }
-function animate(){ mx+=(tx-mx)*.05; my+=(ty-my)*.05; const t=Date.now()/1000; sparkles.forEach((s,i)=>{ s.el.style.transform=`translate(${Math.sin(t+i)*s.base+mx*20}px,${Math.cos(t+i)*s.base+my*20}px)`; }); requestAnimationFrame(animate); }
-animate();
-document.addEventListener('mousemove',e=>{tx=e.clientX/window.innerWidth-.5; ty=e.clientY/window.innerHeight-.5;});
-document.addEventListener('touchmove',e=>{const t=e.touches[0]; tx=t.clientX/window.innerWidth-.5; ty=e.touches[0].clientY/window.innerHeight-.5;});
-
-/* ===== МАСТЕРСКАЯ ===== */
-const previewAvatar=document.getElementById('previewAvatar');
-const previewName=document.getElementById('previewName');
-const previewMood=document.getElementById('previewMood');
-document.getElementById('charName').addEventListener('input',()=>{previewName.textContent=document.getElementById('charName').value||'Имя';});
-document.getElementById('charMood').addEventListener('input',()=>{previewMood.textContent=document.getElementById('charMood').value||'Настроение';});
-document.getElementById('charAvatar').addEventListener('input',()=>{const url=document.getElementById('charAvatar').value; previewAvatar.style.backgroundImage=url?`url(${url})`:'';});
-
 function createCharacter(){
-  const name=document.getElementById('charName').value.trim();
-  const mood=document.getElementById('charMood').value.trim()||'теплый';
-  const avatar=document.getElementById('charAvatar').value.trim()||'https://i.imgur.com/AkFUZMB.png';
-  if(!name) return notify("Введите имя персонажа!");
-  let coins=parseInt(document.getElementById('coins').textContent);
-  if(coins<100) return notify("Недостаточно Retokens!");
-  document.getElementById('coins').textContent=coins-100;
-  localStorage.setItem('coins',coins-100);
-  const userChar={name,mood,avatar};
-  localStorage.setItem('userCharacter',JSON.stringify(userChar));
-  notify(`Персонаж ${name} создан! 100 Retokens потрачено!`);
+  if(profile.tokens<100)return alert("Недостаточно токенов");
+  if(!charName.value||!charDesc.value||!charAvatar.value)return alert("Заполните все поля");
+
+  profile.tokens-=100;
+  const chars=getUserChars();
+  chars.push({
+    name:charName.value,
+    desc:charDesc.value,
+    avatar:charAvatar.value
+  });
+  saveUserChars(chars);
+  localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+  charName.value=charDesc.value=charAvatar.value="";
+  alert("Персонаж создан (доступен только вам)");
 }
 
-function openUserChar(){
-  const data=JSON.parse(localStorage.getItem('userCharacter'));
-  if(!data) return notify("У вас пока нет своего персонажа.");
-  currentChar=data.name;
-  document.getElementById('header').textContent='Hakka AI — '+data.name;
-  setAtmosphere('user');
-  chat.innerHTML='';
-  show('chatScreen');
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 </script>
+
 </body>
 </html>
