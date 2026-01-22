@@ -198,15 +198,15 @@ for(let i=0;i<50;i++){
 </div>
 
 <script>
-// Персонажи
+// Персонажи с расширенными описаниями
 const canonChars = [
-  {name:"Алукард", desc:"Древний бессмертный вампир.", avatar:"https://i.imgur.com/7Qp4FZP.jpg", anime:"Хеллсинг"},
-  {name:"Серас Виктория", desc:"Сильная и человечная вампирша.", avatar:"https://i.imgur.com/Jk0yJYF.jpg", anime:"Хеллсинг"},
-  {name:"Интегра Хеллсинг", desc:"Жёсткий лидер Хеллсинга.", avatar:"https://i.imgur.com/3Jk6gOQ.jpg", anime:"Хеллсинг"},
-  {name:"Риас Гремори", desc:"Харизматичная демонесса.", avatar:"https://i.imgur.com/BH4kG3Y.jpg", anime:"Старшая Школа DXD"},
-  {name:"Акено Химэдзима", desc:"Опасная жрица молний.", avatar:"https://i.imgur.com/6c0Z5hZ.jpg", anime:"Старшая Школа DXD"},
-  {name:"Лойд Форджер", desc:"Хладнокровный шпион.", avatar:"https://i.imgur.com/9U5p4Gk.jpg", anime:"Семья Шпиона"},
-  {name:"Йор Форджер", desc:"Смертоносная убийца.", avatar:"https://i.imgur.com/HLz7WZ9.jpg", anime:"Семья Шпиона"}
+  {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями. Никогда не щадит врагов.", avatar:"https://i.imgur.com/7Qp4FZP.jpg", anime:"Хеллсинг"},
+  {name:"Серас Виктория", desc:"Бывшая полицейская, ставшая вампиршей. Сильная, умная и заботливая, всегда готова защитить своих друзей.", avatar:"https://i.imgur.com/Jk0yJYF.jpg", anime:"Хеллсинг"},
+  {name:"Интегра Хеллсинг", desc:"Жёсткая и справедливая лидер организации Хеллсинг. Сильная личность, требующая дисциплины и порядка.", avatar:"https://i.imgur.com/3Jk6gOQ.jpg", anime:"Хеллсинг"},
+  {name:"Риас Гремори", desc:"Харизматичная демонесса, обладающая красотой и умом. Любит интриги и управлять ситуациями, всегда уверена в себе.", avatar:"https://i.imgur.com/BH4kG3Y.jpg", anime:"Старшая Школа DXD"},
+  {name:"Акено Химэдзима", desc:"Энергичная жрица молний. Обожает вызовы и умеет справляться с самыми опасными ситуациями.", avatar:"https://i.imgur.com/6c0Z5hZ.jpg", anime:"Старшая Школа DXD"},
+  {name:"Лойд Форджер", desc:"Хладнокровный шпион, мастер маскировки и аналитики. Действует спокойно и уверенно, всегда готов к сложным миссиям.", avatar:"https://i.imgur.com/9U5p4Gk.jpg", anime:"Семья Шпиона"},
+  {name:"Йор Форджер", desc:"Смертоносная убийца, скрывающая свои эмоции. Верна своим принципам и защитит близких любой ценой.", avatar:"https://i.imgur.com/HLz7WZ9.jpg", anime:"Семья Шпиона"}
 ];
 
 const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || { nick:"Игрок", tokens:100 };
@@ -277,29 +277,64 @@ function sendMessage(){
   chatWin.appendChild(userBlock);
   msgInput.value=""; chatWin.scrollTop=chatWin.scrollHeight;
 
-  let botReply="Привет! Я персонаж пока без ИИ 🤖";
-  if(botReply.trim()){
-    profile.tokens-=1;
-    localStorage.setItem("hakkaProfile",JSON.stringify(profile));
-    document.getElementById("tokens").textContent=profile.tokens;
+  const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
+  if(!char) return;
 
-    const botBlock=document.createElement("div");
-    botBlock.className="chat-message bot-msg"; botBlock.style.opacity=0;
-    botBlock.innerHTML=`<span class="typing-text"></span><span class="cursor">|</span>`;
-    chatWin.appendChild(botBlock);
-    setTimeout(()=>botBlock.style.opacity=1,50);
-
-    let i=0;
-    const textElem=botBlock.querySelector(".typing-text");
-    const cursor=botBlock.querySelector(".cursor");
-    const cursorBlink=setInterval(()=>{cursor.style.visibility=(cursor.style.visibility==='visible')?'hidden':'visible';},500);
-
-    function typeWriter(){
-      if(i<botReply.length){ textElem.textContent+=botReply[i]; i++; chatWin.scrollTop=chatWin.scrollHeight; setTimeout(typeWriter,50);}
-      else{clearInterval(cursorBlink); cursor.remove();}
-    }
-    typeWriter();
+  let botReply = "";
+  switch(char.name){
+    case "Риас Гремори":
+      botReply = "Приветствую тебя, дорогой! 😈 Я Риас, и сегодня мы проведём время весело и с интригой. Что у тебя на уме?";
+      break;
+    case "Алукард":
+      botReply = "Ты вызвал меня? Готов уничтожить любого врага, кто встанет на пути. Расслабься, пока я сражаюсь с тьмой.";
+      break;
+    case "Серас Виктория":
+      botReply = "Я здесь, чтобы защитить тебя. Давай вместе разберёмся с любыми проблемами. Не бойся, я рядом!";
+      break;
+    case "Интегра Хеллсинг":
+      botReply = "Дела требуют строгости и порядка. Следуй инструкциям, и мы достигнем цели. Слабость здесь не допускается.";
+      break;
+    case "Акено Химэдзима":
+      botReply = "Ох, это будет интересно! ⚡ Я люблю вызовы и неожиданные ситуации. Расскажи, что у тебя на уме.";
+      break;
+    case "Лойд Форджер":
+      botReply = "Все под контролем. Расслабься, я разберусь с любыми трудностями. Не доверяй врагам, я всегда рядом.";
+      break;
+    case "Йор Форджер":
+      botReply = "Опасно быть со мной рядом, но я защищу тебя. 💀 Давай обсудим, что нужно сделать.";
+      break;
+    default:
+      botReply = "Привет! Я персонаж, и скоро научусь говорить больше 😎";
   }
+
+  profile.tokens -= 1;
+  localStorage.setItem("hakkaProfile", JSON.stringify(profile));
+  document.getElementById("tokens").textContent = profile.tokens;
+
+  const botBlock=document.createElement("div");
+  botBlock.className="chat-message bot-msg"; 
+  botBlock.style.opacity=0;
+  botBlock.innerHTML=`<span class="typing-text"></span><span class="cursor">|</span>`;
+  chatWin.appendChild(botBlock);
+  setTimeout(()=>botBlock.style.opacity=1,50);
+
+  let i=0;
+  const textElem=botBlock.querySelector(".typing-text");
+  const cursor=botBlock.querySelector(".cursor");
+  const cursorBlink=setInterval(()=>{cursor.style.visibility=(cursor.style.visibility==='visible')?'hidden':'visible';},500);
+
+  function typeWriter(){
+    if(i<botReply.length){ 
+      textElem.textContent+=botReply[i]; 
+      i++; 
+      chatWin.scrollTop=chatWin.scrollHeight; 
+      setTimeout(typeWriter,30); 
+    } else { 
+      clearInterval(cursorBlink); 
+      cursor.remove(); 
+    }
+  }
+  typeWriter();
 }
 
 function showScreen(id){
@@ -307,5 +342,6 @@ function showScreen(id){
   document.getElementById(id).classList.add("active");
 }
 </script>
+
 </body>
 </html>
