@@ -261,7 +261,12 @@ function createCharacter(){
 }
 
 // ЧАТ
-function openChat(charName){ activeChar=charName; showScreen("chat"); document.getElementById("chatWindow").innerHTML=""; }
+function openChat(charName){
+  activeChar=charName;
+  showScreen("chat");
+  renderSavedChat(charName); // === CHAT SAVE ADD ===
+}
+  
 function goCharacters(){ activeChar=null; showScreen("characters"); }
 
 function sendMessage(){
@@ -341,8 +346,40 @@ function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
+
+// ===============================
+// === CHAT SAVE SYSTEM (ADD) ===
+// ===============================
+function getChatKey(charName){
+  return "hakkaChat_" + profile.nick + "_" + charName;
+}
+
+function loadChat(charName){
+  return JSON.parse(localStorage.getItem(getChatKey(charName))) || [];
+}
+
+function saveChat(charName, messages){
+  localStorage.setItem(getChatKey(charName), JSON.stringify(messages));
+}
+
+function renderSavedChat(charName){
+  const chatWin = document.getElementById("chatWindow");
+  chatWin.innerHTML = "";
+
+  const messages = loadChat(charName);
+  messages.forEach(m=>{
+    const div = document.createElement("div");
+    div.className = "chat-message " + (m.from === "user" ? "user-msg" : "bot-msg");
+    div.textContent = m.text;
+    chatWin.appendChild(div);
+  });
+
+  chatWin.scrollTop = chatWin.scrollHeight;
+}
+  
 </script>
 
 </body>
 </html>
+
 
