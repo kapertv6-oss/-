@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>HAKKA</title>
+<title>HAKKA AI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 :root{
@@ -35,7 +35,6 @@ body::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
 .characters-wrapper::-webkit-scrollbar-thumb { background:var(--neon); border-radius:6px; }
 .characters-wrapper::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
 
-/* Частицы */
 .particle{
   position:absolute;
   width:4px;height:4px;
@@ -49,34 +48,25 @@ body::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
   to{transform:translateY(-10vh);}
 }
 
-/* Контейнер */
 .app{ max-width:420px; margin:auto; padding:16px; }
 
-/* Экраны */
 .screen{display:none;animation:fade .3s ease;}
 .screen.active{display:block;}
 @keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;} }
 
-/* Заголовки */
 .title{ text-align:center; font-size:24px; font-weight:700; color:var(--neon); margin-bottom:16px; }
 
-/* Карточки */
 .card{ background:linear-gradient(180deg,var(--card1),var(--card2)); border-radius:16px; padding:14px; margin-bottom:14px; display:flex; flex-direction:column; align-items:center; transition:.3s; }
 .card:hover{ transform:translateY(-2px); box-shadow:0 0 16px rgba(255,77,109,.4); }
 
-/* Кнопки */
 button{ background:var(--neon); border:none; color:white; padding:10px; border-radius:12px; font-weight:600; cursor:pointer; width:100%; }
 
-/* Inputs */
 input,textarea,select{ width:100%; margin-top:8px; padding:10px; border-radius:12px; border:none; background:#161a2a; color:white; font-weight:600; outline:none; }
 textarea{resize:none;height:70px}
 
-/* Стиль select фильтр */
 #animeFilter{
   border:2px solid var(--neon);
   appearance:none;
-  -webkit-appearance:none;
-  -moz-appearance:none;
   cursor:pointer;
   background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><polygon points="0,0 12,0 6,6" fill="white"/></svg>');
   background-repeat:no-repeat;
@@ -87,11 +77,9 @@ textarea{resize:none;height:70px}
 #animeFilter:hover{ box-shadow:0 0 10px var(--neon); border-color:#ff80a0; }
 #animeFilter:focus{ box-shadow:0 0 14px var(--neon); border-color:var(--neon); }
 
-/* Профиль */
 .profile-row{ display:flex; justify-content:space-between; margin:10px 0; }
 .token{color:var(--neon); font-weight:700}
 
-/* Персонажи */
 .characters-wrapper{ max-height:50vh; overflow-y:auto; padding-right:6px; }
 .characters-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .char-card{text-align:center; opacity:0; animation:fadeInCard .4s forwards; }
@@ -99,20 +87,17 @@ textarea{resize:none;height:70px}
 .avatar{ width:60px;height:60px; border-radius:50%; margin:0 auto 8px; background-size:cover; background-position:center; border:2px solid var(--neon); }
 .char-card p{ font-size:13px; opacity:.85; line-height:1.3; }
 
-/* Цветовая маркировка */
 .char-label{ font-size:12px; margin-top:4px; font-weight:600; padding:2px 6px; border-radius:8px; color:white; display:inline-block; }
 .dx-color{ background:var(--dx-color); }
 .hellsing-color{ background:var(--hellsing-color); }
 .spy-color{ background:var(--spy-color); }
 .user-color{ background:var(--user-color); }
 
-/* Чат */
 .chat-message{ padding:6px 10px; border-radius:12px; max-width:80%; word-wrap:break-word; color:white; margin-bottom:4px; display:flex; flex-direction:column; }
 .user-msg{ align-self:flex-end; background:var(--neon);}
 .bot-msg{ align-self:flex-start; background:#161a2a; border:1px solid var(--neon);}
 .cursor{ display:inline-block; color:var(--neon); margin-left:2px; font-weight:bold; }
 
-/* Мобильная адаптация */
 @media (max-width:420px){
   .characters-grid{ grid-template-columns:1fr; }
 }
@@ -132,8 +117,6 @@ for(let i=0;i<50;i++){
 </script>
 
 <div class="app">
-
-<!-- МЕНЮ -->
 <div id="menu" class="screen active">
   <div class="title">Hakka AI</div>
   <div class="card"><button onclick="openProfile()">👤 Профиль</button></div>
@@ -141,7 +124,6 @@ for(let i=0;i<50;i++){
   <div class="card"><button onclick="openWorkshop()">⚒ Мастерская</button></div>
 </div>
 
-<!-- ПРОФИЛЬ -->
 <div id="profile" class="screen">
   <div class="title">Профиль</div>
   <input id="nickname" placeholder="Ник пользователя">
@@ -153,10 +135,8 @@ for(let i=0;i<50;i++){
   <button onclick="goMenu()" style="margin-top:10px;">Назад</button>
 </div>
 
-<!-- ПЕРСОНАЖИ -->
 <div id="characters" class="screen">
   <div class="title">Персонажи</div>
-
   <div style="margin-bottom:12px;">
     <select id="animeFilter" onchange="renderCharacters()">
       <option value="all">Все аниме</option>
@@ -166,14 +146,12 @@ for(let i=0;i<50;i++){
       <option value="Пользовательские">Ваши персонажи</option>
     </select>
   </div>
-
   <div class="characters-wrapper">
     <div class="characters-grid" id="charactersGrid"></div>
   </div>
   <button onclick="goMenu()" style="margin-top:14px;">Назад</button>
 </div>
 
-<!-- МАСТЕРСКАЯ -->
 <div id="workshop" class="screen">
   <div class="title">Мастерская</div>
   <div class="card">
@@ -186,7 +164,6 @@ for(let i=0;i<50;i++){
   <button onclick="goMenu()">Назад</button>
 </div>
 
-<!-- ЧАТ -->
 <div id="chat" class="screen">
   <div class="title">Чат с персонажем</div>
   <div class="characters-wrapper" id="chatWindow" style="max-height:50vh; display:flex; flex-direction:column; gap:6px;"></div>
@@ -195,25 +172,19 @@ for(let i=0;i<50;i++){
   <button onclick="goCharacters()" style="margin-top:10px;">Назад</button>
   <button onclick="clearChat()" style="margin-top:6px;background:#8a2be2;">Очистить чат</button>
 </div>
-
 </div>
 
 <script>
-// ==== ДАННЫЕ ПЕРСОНАЖЕЙ ====
 const canonChars = [
-  {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями. Никогда не щадит врагов.", avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg", anime:"Хеллсинг"},
-  {name:"Серас Виктория", desc:"Бывшая полицейская, ставшая вампиршей. Сильная, умная и заботливая, всегда готова защитить своих друзей.", avatar:"https://avatars.mds.yandex.net/i?id=baf2a72f11162bd2c0f31908cd79b03170b017ae-16922605-images-thumbs&n=13", anime:"Хеллсинг"},
-  {name:"Интегра Хеллсинг", desc:"Жёсткая и справедливая лидер организации Хеллсинг. Сильная личность, требующая дисциплины и порядка.", avatar:"https://tse4.mm.bing.net/th/id/OIP.ryA9tvA5aVlvzyWATzzqSgHaEE?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Хеллсинг"},
-  {name:"Риас Гремори", desc:"Харизматичная демонесса, обладающая красотой и умом. Любит интриги и управлять ситуациями, всегда уверена в себе.", avatar:"https://zefirka.club/uploads/posts/2022-09/1662219894_4-zefirka-club-p-rias-gremori-na-avu-5.jpg", anime:"Старшая Школа DXD"},
-  {name:"Акено Химэдзима", desc:"Энергичная жрица молний. Обожает вызовы и умеет справляться с самыми опасными ситуациями.", avatar:"https://tse2.mm.bing.net/th/id/OIP.khPZy1V5b1ahtbPtQ6nbSgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Старшая Школа DXD"},
-  {name:"Лойд Форджер", desc:"Хладнокровный шпион, мастер маскировки и аналитики. Действует спокойно и уверенно, всегда готов к сложным миссиям.", avatar:"https://i.pinimg.com/736x/e8/01/c2/e801c2db5c32af8ab7fec82eb2bd51cf.jpg", anime:"Семья Шпиона"},
-  {name:"Йор Форджер", desc:"Смертоносная убийца, скрывающая свои эмоции. Верна своим принципам и защитит близких любой ценой.", avatar:"https://tse4.mm.bing.net/th/id/OIP.yzvjrPUBd16irp115FE_xQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Семья Шпиона"}
+  {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями.", avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg", anime:"Хеллсинг"},
+  {name:"Серас Виктория", desc:"Бывшая полицейская, ставшая вампиршей.", avatar:"https://avatars.mds.yandex.net/i?id=baf2a72f11162bd2c0f31908cd79b03170b017ae-16922605-images-thumbs&n=13", anime:"Хеллсинг"},
+  {name:"Риас Гремори", desc:"Харизматичная демонесса, любит интриги и управлять ситуациями.", avatar:"https://zefirka.club/uploads/posts/2022-09/1662219894_4-zefirka-club-p-rias-gremori-na-avu-5.jpg", anime:"Старшая Школа DXD"},
+  {name:"Акено Химэдзима", desc:"Энергичная жрица молний.", avatar:"https://tse2.mm.bing.net/th/id/OIP.khPZy1V5b1ahtbPtQ6nbSgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Старшая Школа DXD"}
 ];
 
 const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || { nick:"Игрок", tokens:100 };
 let activeChar = null;
 
-// ==== ФУНКЦИИ ПЕРСОНАЛЬНЫХ ПЕРСОНАЖЕЙ ====
 function getUserChars(){ return JSON.parse(localStorage.getItem("customChars_"+profile.nick)) || []; }
 function saveUserChars(chars){ localStorage.setItem("customChars_"+profile.nick, JSON.stringify(chars)); }
 
@@ -229,7 +200,6 @@ function renderCharacters(){
   grid.innerHTML="";
   let charsToShow=[...canonChars];
   const userChars=getUserChars();
-
   if(filter==="Пользовательские") charsToShow=userChars;
   else if(filter!=="all") charsToShow=charsToShow.filter(c=>c.anime===filter);
   if(filter==="all") charsToShow.push(...userChars.map(c=>({...c, anime:"Пользовательские"})));
@@ -262,16 +232,10 @@ function createCharacter(){
   alert("Персонаж создан (доступен только вам)");
 }
 
-// ==== ЧАТ ====
-function openChat(charName){
-  activeChar=charName;
-  showScreen("chat");
-  renderSavedChat(charName);
-}
-
+function openChat(charName){ activeChar=charName; showScreen("chat"); renderSavedChat(charName); }
 function goCharacters(){ activeChar=null; showScreen("characters"); }
 
-function sendMessage(){
+async function sendMessage(){
   const msgInput=document.getElementById("userMessage");
   const msg=msgInput.value.trim();
   if(!msg)return;
@@ -284,73 +248,36 @@ function sendMessage(){
   chatWin.appendChild(userBlock);
   msgInput.value=""; chatWin.scrollTop=chatWin.scrollHeight;
 
-  const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
-  if(!char) return;
-
-  let botReply = "";
-  switch(char.name){
-    case "Риас Гремори":
-      botReply = "Приветствую тебя, дорогой! 😈 Я Риас, и сегодня мы проведём время весело и с интригой. Что у тебя на уме?";
-      break;
-    case "Алукард":
-      botReply = "Ты вызвал меня? Готов уничтожить любого врага, кто встанет на пути. Расслабься, пока я сражаюсь с тьмой.";
-      break;
-    case "Серас Виктория":
-      botReply = "Я здесь, чтобы защитить тебя. Давай вместе разберёмся с любыми проблемами. Не бойся, я рядом!";
-      break;
-    case "Интегра Хеллсинг":
-      botReply = "Дела требуют строгости и порядка. Следуй инструкциям, и мы достигнем цели. Слабость здесь не допускается.";
-      break;
-    case "Акено Химэдзима":
-      botReply = "Ох, это будет интересно! ⚡ Я люблю вызовы и неожиданные ситуации. Расскажи, что у тебя на уме.";
-      break;
-    case "Лойд Форджер":
-      botReply = "Всё под контролем. Следую плану и наблюдаю за ситуацией. Ты можешь расслабиться, пока я действую.";
-      break;
-    case "Йор Форджер":
-      botReply = "Не волнуйся. Я защищу тебя любой ценой. Если кто-то попытается навредить — об этом узнают очень быстро.";
-      break;
-    default:
-      botReply = `Привет! Я ${char.name} и готова поговорить с тобой.`;
-  }
-
-  profile.tokens--; localStorage.setItem("hakkaProfile",JSON.stringify(profile));
-  document.getElementById("tokens").textContent=profile.tokens;
-
-  typeBotMessage(botReply, chatWin);
-  saveChatMessage(activeChar, "user", msg);
-  saveChatMessage(activeChar, "bot", botReply);
+  try{
+    const response = await fetch("http://localhost:8000/chat", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({user:profile.nick,char:activeChar,msg})
+    });
+    const data=await response.json();
+    if(data.error){alert(data.error); return;}
+    profile.tokens = data.tokens;
+    document.getElementById("tokens").textContent = profile.tokens;
+    typeBotMessage(data.reply, chatWin);
+    saveChatMessage(activeChar,"user",msg);
+    saveChatMessage(activeChar,"bot",data.reply);
+  }catch(e){alert("Ошибка сервера"); console.error(e);}
 }
 
 function typeBotMessage(botReply, chatWin){
   const botBlock=document.createElement("div");
-  botBlock.className="chat-message bot-msg";
-  botBlock.style.opacity=0;
-
+  botBlock.className="chat-message bot-msg"; botBlock.style.opacity=0;
   const textElem=document.createElement("span"); textElem.className="typing-text";
   const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="|";
-
-  botBlock.appendChild(textElem);
-  botBlock.appendChild(cursor);
-  chatWin.appendChild(botBlock);
-
+  botBlock.appendChild(textElem); botBlock.appendChild(cursor); chatWin.appendChild(botBlock);
   setTimeout(()=>botBlock.style.opacity=1,50);
-
   let i=0;
   const cursorBlink=setInterval(()=>{ cursor.style.visibility=(cursor.style.visibility==='visible')?'hidden':'visible'; },500);
-
-  function typeWriter(){
-    if(i<botReply.length){
-      textElem.textContent+=botReply[i]; i++;
-      chatWin.scrollTop=chatWin.scrollHeight;
-      setTimeout(typeWriter,30);
-    } else { clearInterval(cursorBlink); cursor.remove(); }
-  }
+  function typeWriter(){ if(i<botReply.length){ textElem.textContent+=botReply[i]; i++; chatWin.scrollTop=chatWin.scrollHeight; setTimeout(typeWriter,30); } else { clearInterval(cursorBlink); cursor.remove(); } }
   typeWriter();
 }
 
-// ==== СОХРАНЕНИЕ ЧАТА ====
-function saveChatMessage(charName, sender, message){
+function saveChatMessage(charName,sender,message){
   const chatKey="chat_"+profile.nick+"_"+charName;
   const chat=JSON.parse(localStorage.getItem(chatKey))||[];
   chat.push({sender,message});
@@ -358,31 +285,15 @@ function saveChatMessage(charName, sender, message){
 }
 
 function renderSavedChat(charName){
-  const chatWin=document.getElementById("chatWindow");
-  chatWin.innerHTML="";
+  const chatWin=document.getElementById("chatWindow"); chatWin.innerHTML="";
   const chatKey="chat_"+profile.nick+"_"+charName;
   const chat=JSON.parse(localStorage.getItem(chatKey))||[];
-  chat.forEach(m=>{
-    const block=document.createElement("div");
-    block.className="chat-message "+(m.sender==="user"?"user-msg":"bot-msg");
-    block.textContent=m.message;
-    chatWin.appendChild(block);
-  });
+  chat.forEach(m=>{ const block=document.createElement("div"); block.className="chat-message "+(m.sender==="user"?"user-msg":"bot-msg"); block.textContent=m.message; chatWin.appendChild(block); });
   chatWin.scrollTop=chatWin.scrollHeight;
 }
 
-function clearChat(){
-  if(!activeChar) return;
-  const chatKey="chat_"+profile.nick+"_"+activeChar;
-  localStorage.removeItem(chatKey);
-  renderSavedChat(activeChar);
-}
-
-// ==== УТИЛИТЫ ====
-function showScreen(screenId){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(screenId).classList.add("active");
-}
+function clearChat(){ if(!activeChar)return; const chatKey="chat_"+profile.nick+"_"+activeChar; localStorage.removeItem(chatKey); renderSavedChat(activeChar); }
+function showScreen(screenId){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(screenId).classList.add("active"); }
 </script>
 
 </body>
