@@ -16,7 +16,7 @@
   --spy-color:#00ced1;
   --user-color:#ff69b4;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;}
 body{
   margin:0;
   font-family:Segoe UI, sans-serif;
@@ -30,68 +30,30 @@ body::-webkit-scrollbar-track { background:#0b0d14; border-radius:8px; }
 body::-webkit-scrollbar-thumb { background:var(--neon); border-radius:8px; }
 body::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
 
-.characters-wrapper::-webkit-scrollbar { width:6px; }
-.characters-wrapper::-webkit-scrollbar-track { background:#0b0d14; border-radius:6px; }
-.characters-wrapper::-webkit-scrollbar-thumb { background:var(--neon); border-radius:6px; }
-.characters-wrapper::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
-
-/* Частицы */
-.particle{
-  position:absolute;
-  width:4px;height:4px;
-  background:var(--neon);
-  border-radius:50%;
-  opacity:.6;
-  animation: float 14s linear infinite;
-}
-@keyframes float{
-  from{transform:translateY(110vh);}
-  to{transform:translateY(-10vh);}
-}
-
-/* Контейнер */
 .app{ max-width:420px; margin:auto; padding:16px; }
 
-/* Экраны */
 .screen{display:none;animation:fade .3s ease;}
 .screen.active{display:block;}
 @keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;} }
 
-/* Заголовки */
 .title{ text-align:center; font-size:24px; font-weight:700; color:var(--neon); margin-bottom:16px; }
 
-/* Карточки */
 .card{ background:linear-gradient(180deg,var(--card1),var(--card2)); border-radius:16px; padding:14px; margin-bottom:14px; display:flex; flex-direction:column; align-items:center; transition:.3s; }
 .card:hover{ transform:translateY(-2px); box-shadow:0 0 16px rgba(255,77,109,.4); }
 
-/* Кнопки */
-button{ background:var(--neon); border:none; color:white; padding:10px; border-radius:12px; font-weight:600; cursor:pointer; width:100%; transition:.3s; }
-button:hover{ transform:translateY(-2px); box-shadow:0 0 12px var(--neon); }
+button{ background:var(--neon); border:none; color:white; padding:10px; border-radius:12px; font-weight:600; cursor:pointer; width:100%; margin-top:8px; transition:.3s; }
+button:hover{ box-shadow:0 0 12px var(--neon); }
 
 input,textarea,select{ width:100%; margin-top:8px; padding:10px; border-radius:12px; border:none; background:#161a2a; color:white; font-weight:600; outline:none; }
 textarea{resize:none;height:70px}
 
-/* Стиль select фильтр */
-#animeFilter{
-  border:2px solid var(--neon);
-  appearance:none;
-  -webkit-appearance:none;
-  -moz-appearance:none;
-  cursor:pointer;
-  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><polygon points="0,0 12,0 6,6" fill="white"/></svg>');
-  background-repeat:no-repeat;
-  background-position:right 12px center;
-  background-size:12px 12px;
-  transition:.3s;
-}
+#animeFilter{ border:2px solid var(--neon); appearance:none; cursor:pointer; background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><polygon points="0,0 12,0 6,6" fill="white"/></svg>'); background-repeat:no-repeat; background-position:right 12px center; background-size:12px 12px; transition:.3s; }
 #animeFilter:hover{ box-shadow:0 0 10px var(--neon); border-color:#ff80a0; }
 #animeFilter:focus{ box-shadow:0 0 14px var(--neon); border-color:var(--neon); }
 
-/* Профиль */
 .profile-row{ display:flex; justify-content:space-between; margin:10px 0; }
 .token{color:var(--neon); font-weight:700}
 
-/* Персонажи */
 .characters-wrapper{ max-height:50vh; overflow-y:auto; padding-right:6px; }
 .characters-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .char-card{text-align:center; opacity:0; animation:fadeInCard .4s forwards; }
@@ -105,7 +67,6 @@ textarea{resize:none;height:70px}
 .spy-color{ background:var(--spy-color); }
 .user-color{ background:var(--user-color); }
 
-/* Чат */
 .chat-message{ padding:6px 10px; border-radius:12px; max-width:80%; word-wrap:break-word; color:white; margin-bottom:4px; display:flex; flex-direction:column; }
 .user-msg{ align-self:flex-end; background:var(--neon);}
 .bot-msg{ align-self:flex-start; background:#161a2a; border:1px solid var(--neon);}
@@ -118,26 +79,32 @@ textarea{resize:none;height:70px}
 </head>
 <body>
 <div class="app">
-  <h1 class="title">HAKKA</h1>
-  
-  <!-- Профиль -->
-  <div class="screen" id="profile">
+
+  <div id="menu" class="screen active">
+    <h1 class="title">HAKKA</h1>
+    <button onclick="openProfile()">Профиль</button>
+    <button onclick="openCharacters()">Персонажи</button>
+    <button onclick="openWorkshop()">Мастерская</button>
+    <button onclick="claimDaily()">Ежедневная награда</button>
+  </div>
+
+  <div id="profile" class="screen">
+    <h1 class="title">Профиль</h1>
     <div class="profile-row">
-      <span>Ник: <input type="text" id="nickname"></span>
-      <span>Токены: <span id="tokens">0</span></span>
+      <span>Ник:</span><input id="nickname" type="text">
+    </div>
+    <div class="profile-row">
+      <span>Токены:</span><span id="tokens" class="token"></span>
+    </div>
+    <div id="adminControls" style="display:none;">
+      <button onclick="addAdminTokens()">+100 токенов (Админ)</button>
     </div>
     <button onclick="saveProfile()">Сохранить профиль</button>
     <button onclick="goMenu()">Назад</button>
   </div>
-  
-  <!-- Меню -->
-  <div class="screen active" id="menu">
-    <button onclick="openProfile()">Профиль</button>
-    <button onclick="openCharacters()">Персонажи</button>
-  </div>
-  
-  <!-- Персонажи -->
-  <div class="screen" id="characters">
+
+  <div id="characters" class="screen">
+    <h1 class="title">Персонажи</h1>
     <select id="animeFilter" onchange="renderCharacters()">
       <option value="all">Все</option>
       <option value="Хеллсинг">Хеллсинг</option>
@@ -146,21 +113,23 @@ textarea{resize:none;height:70px}
       <option value="Пользовательские">Пользовательские</option>
     </select>
     <div class="characters-wrapper">
-      <div class="characters-grid" id="charactersGrid"></div>
+      <div id="charactersGrid" class="characters-grid"></div>
     </div>
     <button onclick="goMenu()">Назад</button>
   </div>
-  
-  <!-- Чат -->
-  <div class="screen" id="chat">
-    <div class="characters-wrapper" id="chatWindow" style="height:40vh;overflow-y:auto; margin-bottom:8px;"></div>
-    <textarea id="userMessage" placeholder="Напишите сообщение..."></textarea>
+
+  <div id="chat" class="screen">
+    <h1 class="title" id="chatTitle">Чат</h1>
+    <div id="chatWindow" class="characters-wrapper"></div>
+    <input id="userMessage" type="text" placeholder="Напиши сообщение...">
     <button onclick="sendMessage()">Отправить</button>
     <button onclick="goCharacters()">Назад</button>
   </div>
+
 </div>
 
 <script>
+// ==== ДАННЫЕ ПЕРСОНАЖЕЙ ====
 const canonChars = [
   {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями.", avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg", anime:"Хеллсинг"},
   {name:"Серас Виктория", desc:"Бывшая полицейская, ставшая вампиршей. Сильная и заботливая.", avatar:"https://avatars.mds.yandex.net/i?id=baf2a72f11162bd2c0f31908cd79b03170b017ae-16922605-images-thumbs&n=13", anime:"Хеллсинг"},
@@ -171,15 +140,18 @@ const canonChars = [
   {name:"Йор Форджер", desc:"Смертоносная убийца, скрывает эмоции.", avatar:"https://tse4.mm.bing.net/th/id/OIP.yzvjrPUBd16irp115FE_xQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Семья Шпиона"}
 ];
 
-const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || { nick:"Игрок", tokens:100 };
+const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || { nick:"Игрок", tokens:100, lastDaily:0 };
 let activeChar = null;
 
+// ==== Функции ====
 function getUserChars(){ return JSON.parse(localStorage.getItem("customChars_"+profile.nick)) || []; }
 function saveUserChars(chars){ localStorage.setItem("customChars_"+profile.nick, JSON.stringify(chars)); }
 
-function openProfile(){ showScreen("profile"); nickname.value=profile.nick; tokens.textContent=profile.tokens; }
-function saveProfile(){ profile.nick=nickname.value||"Игрок"; localStorage.setItem("hakkaProfile",JSON.stringify(profile)); alert("Профиль сохранён"); }
+function openProfile(){ showScreen("profile"); document.getElementById("nickname").value=profile.nick; document.getElementById("tokens").textContent=profile.tokens; checkAdmin(); }
+function saveProfile(){ profile.nick=document.getElementById("nickname").value||"Игрок"; localStorage.setItem("hakkaProfile",JSON.stringify(profile)); alert("Профиль сохранён"); checkAdmin(); }
 function openCharacters(){ showScreen("characters"); renderCharacters(); }
+function goCharacters(){ activeChar=null; showScreen("characters"); }
+function openWorkshop(){ showScreen("workshop"); }
 function goMenu(){ showScreen("menu"); }
 
 function renderCharacters(){
@@ -188,6 +160,7 @@ function renderCharacters(){
   grid.innerHTML="";
   let charsToShow=[...canonChars];
   const userChars=getUserChars();
+
   if(filter==="Пользовательские") charsToShow=userChars;
   else if(filter!=="all") charsToShow=charsToShow.filter(c=>c.anime===filter);
   if(filter==="all") charsToShow.push(...userChars.map(c=>({...c, anime:"Пользовательские"})));
@@ -208,81 +181,99 @@ function renderCharacters(){
   });
 }
 
-function openChat(charName){ activeChar=charName; showScreen("chat"); renderSavedChat(charName); }
-function goCharacters(){ activeChar=null; showScreen("characters"); }
-
+// ==== Чат ====
+function openChat(charName){ activeChar=charName; showScreen("chat"); renderSavedChat(charName); document.getElementById("chatTitle").textContent=`Чат с ${charName}`; }
 function sendMessage(){
   const msgInput=document.getElementById("userMessage");
   const msg=msgInput.value.trim();
-  if(!msg){ alert("Введите сообщение"); return; }
+  if(!msg)return;
   if(profile.tokens<1){alert("Недостаточно токенов!"); return;}
 
   const chatWin=document.getElementById("chatWindow");
   const userBlock=document.createElement("div");
-  userBlock.className="chat-message user-msg"; userBlock.textContent=msg;
-  chatWin.appendChild(userBlock); chatWin.scrollTop=chatWin.scrollHeight;
-  saveChatMessage(activeChar,"user",msg);
+  userBlock.className="chat-message user-msg"; userBlock.textContent=msg; chatWin.appendChild(userBlock);
+  chatWin.scrollTop=chatWin.scrollHeight; saveChatMessage(activeChar, "user", msg);
 
-  const char = [...canonChars, ...getUserChars()].find(c=>c.name===activeChar);
+  const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
   if(!char) return;
 
-  profile.tokens--; document.getElementById("tokens").textContent=profile.tokens;
+  profile.tokens--; 
   localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+  document.getElementById("tokens").textContent=profile.tokens;
 
   fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:msg, character:char.name, description:char.desc})
+    body:JSON.stringify({ message: msg, character: char.name, description: char.desc })
   })
   .then(res=>res.json())
   .then(data=>{
-    const botReply = data.answer || `Я ${char.name} не смогла получить ответ`;
-    typeBotMessage(botReply,chatWin);
-    saveChatMessage(activeChar,"bot",botReply);
+    const botReply=data.answer || `Я ${char.name} слышу твоё сообщение: "${msg}"`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
   })
   .catch(()=>{
-    const botReply = `Я ${char.name} не смогла получить ответ`;
-    typeBotMessage(botReply,chatWin);
-    saveChatMessage(activeChar,"bot",botReply);
+    const botReply=`Я ${char.name} слышу твоё сообщение: "${msg}" (ИИ временно недоступен)`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
   });
-
-  msgInput.value="";
 }
 
-function typeBotMessage(text,chatWin){
+function typeBotMessage(botReply, chatWin){
   const botBlock=document.createElement("div");
   botBlock.className="chat-message bot-msg"; botBlock.style.opacity=0;
-  const span=document.createElement("span"); span.className="typing-text";
+  const textElem=document.createElement("span"); textElem.className="typing-text";
   const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="|";
-  botBlock.appendChild(span); botBlock.appendChild(cursor);
-  chatWin.appendChild(botBlock); setTimeout(()=>botBlock.style.opacity=1,50);
+  botBlock.appendChild(textElem); botBlock.appendChild(cursor); chatWin.appendChild(botBlock);
+  setTimeout(()=>botBlock.style.opacity=1,50);
   let i=0;
-  const blink=setInterval(()=>cursor.style.visibility=cursor.style.visibility==="visible"?"hidden":"visible",500);
+  const cursorBlink=setInterval(()=>{ cursor.style.visibility=(cursor.style.visibility==='visible')?'hidden':'visible'; },500);
   function typeWriter(){
-    if(i<text.length){ span.textContent+=text[i]; i++; chatWin.scrollTop=chatWin.scrollHeight; setTimeout(typeWriter,30); }
-    else{ clearInterval(blink); cursor.remove(); }
+    if(i<botReply.length){ textElem.textContent+=botReply[i]; i++; chatWin.scrollTop=chatWin.scrollHeight; setTimeout(typeWriter,30);}
+    else{ clearInterval(cursorBlink); cursor.remove(); }
   }
   typeWriter();
 }
 
-function saveChatMessage(charName,sender,msg){
-  const chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
+// ==== Сохранение чата ====
+function saveChatMessage(charName, sender, msg){
+  let chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
   chats.push({sender,msg});
   localStorage.setItem("chat_"+profile.nick+"_"+charName,JSON.stringify(chats));
 }
 function renderSavedChat(charName){
   const chatWin=document.getElementById("chatWindow"); chatWin.innerHTML="";
-  const chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
+  let chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
   chats.forEach(c=>{
     const div=document.createElement("div");
-    div.className="chat-message "+(c.sender==="user"?"user-msg":"bot-msg");
-    div.textContent=c.msg; chatWin.appendChild(div);
+    div.className="chat-message "+(c.sender==="user"?"user-msg":"bot-msg"); div.textContent=c.msg; chatWin.appendChild(div);
   });
   chatWin.scrollTop=chatWin.scrollHeight;
 }
+function clearChat(){ if(activeChar){ localStorage.removeItem("chat_"+profile.nick+"_"+activeChar); renderSavedChat(activeChar); } }
 
+// ==== Админ ====
+const adminNick="Расул";
+function checkAdmin(){ document.getElementById("adminControls").style.display=(profile.nick===adminNick)?"block":"none"; }
+function addAdminTokens(){ profile.tokens+=100; localStorage.setItem("hakkaProfile",JSON.stringify(profile)); document.getElementById("tokens").textContent=profile.tokens; alert("Токены выданы!"); }
+
+// ==== Ежедневная награда ====
+function claimDaily(){
+  const now=Date.now();
+  if(now-profile.lastDaily>=24*60*60*1000){
+    profile.tokens+=50; profile.lastDaily=now;
+    localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+    document.getElementById("tokens").textContent=profile.tokens;
+    alert("Ежедневная награда: +50 токенов!");
+  }else{
+    const next=Math.ceil((24*60*60*1000-(now-profile.lastDaily))/1000/60);
+    alert(`Награда уже получена! Ждите ещё ${next} минут.`);
+  }
+}
+
+// ==== Утилиты ====
 function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+
 </script>
 </body>
 </html>
-
