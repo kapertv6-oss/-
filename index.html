@@ -120,7 +120,9 @@ textarea{resize:none;height:70px}
 <script>
 for(let i=0;i<50;i++){
   const p=document.createElement("div");
-  p.className="particle";
+  p.class
+
+Name="particle";
   p.style.left=Math.random()*100+"vw";
   p.style.animationDuration=10+Math.random()*10+"s";
   p.style.opacity=Math.random();
@@ -282,8 +284,26 @@ function sendMessage(){
   const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
   if(!char) return;
 
-  // Примерные ответы персонажей (можно расширять)
-  let botReply = `Привет! Я ${char.name} и готова поговорить с тобой.`;
+  // Запрос к ИИ
+fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    message: msg,
+    character: char.name,
+    description: char.desc
+  })
+})
+.then(res => res.json())
+.then(data => {
+  const botReply = data.answer || "Я задумалась...";
+
+  typeBotMessage(botReply, chatWin);
+  saveChatMessage(activeChar, "bot", botReply);
+})
+.catch(() => {
+  typeBotMessage("Ошибка связи с ИИ 😢", chatWin);
+});
 
   profile.tokens--; localStorage.setItem("hakkaProfile",JSON.stringify(profile));
   document.getElementById("tokens").textContent=profile.tokens;
@@ -350,4 +370,7 @@ function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.class
 
 </body>
 </html>
+
+
+
 
