@@ -2,121 +2,278 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Чат с ИИ</title>
+<title>HAKKA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #0b0d14;
-    color: #f2f2f2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 20px;
-    height: 100vh;
-    margin: 0;
+:root{
+  --bg:#0b0d14;
+  --neon:#ff4d6d;
+  --text:#f2f2f2;
+  --card1:#161a2a;
+  --card2:#0f1220;
+  --dx-color:#ff8c00;
+  --hellsing-color:#8a2be2;
+  --spy-color:#00ced1;
+  --user-color:#ff69b4;
 }
-#chatWindow {
-    background: #161a2a;
-    border: 2px solid #ff4d6d;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 500px;
-    height: 400px;
-    overflow-y: auto;
-    padding: 10px;
-    margin-bottom: 10px;
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:radial-gradient(circle at top,#14182a,var(--bg));
+  color:var(--text);
+  min-height:100vh;
+  overflow-y:auto;
 }
-.chat-message {
-    padding: 8px 12px;
-    margin: 6px 0;
-    border-radius: 12px;
-    max-width: 80%;
-    word-wrap: break-word;
-}
-.user-msg {
-    background: #ff4d6d;
-    align-self: flex-end;
-}
-.bot-msg {
-    background: #161a2a;
-    border: 1px solid #ff4d6d;
-    align-self: flex-start;
-}
-input, button {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 12px;
-    border: none;
-}
-input {
-    width: 300px;
-    margin-right: 10px;
-}
-button {
-    background: #ff4d6d;
-    color: white;
-    cursor: pointer;
+body::-webkit-scrollbar { width:8px; }
+body::-webkit-scrollbar-track { background:#0b0d14; border-radius:8px; }
+body::-webkit-scrollbar-thumb { background:var(--neon); border-radius:8px; }
+body::-webkit-scrollbar-thumb:hover { background:#ff80a0; }
+
+.app{ max-width:420px; margin:auto; padding:16px; }
+
+.screen{display:none;animation:fade .3s ease;}
+.screen.active{display:block;}
+@keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;} }
+
+.title{ text-align:center; font-size:24px; font-weight:700; color:var(--neon); margin-bottom:16px; }
+
+.card{ background:linear-gradient(180deg,var(--card1),var(--card2)); border-radius:16px; padding:14px; margin-bottom:14px; display:flex; flex-direction:column; align-items:center; transition:.3s; }
+.card:hover{ transform:translateY(-2px); box-shadow:0 0 16px rgba(255,77,109,.4); }
+
+button{ background:var(--neon); border:none; color:white; padding:10px; border-radius:12px; font-weight:600; cursor:pointer; width:100%; margin-top:8px; transition:.3s; }
+button:hover{ box-shadow:0 0 12px var(--neon); }
+
+input,textarea,select{ width:100%; margin-top:8px; padding:10px; border-radius:12px; border:none; background:#161a2a; color:white; font-weight:600; outline:none; }
+textarea{resize:none;height:70px}
+
+#animeFilter{ border:2px solid var(--neon); appearance:none; cursor:pointer; background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><polygon points="0,0 12,0 6,6" fill="white"/></svg>'); background-repeat:no-repeat; background-position:right 12px center; background-size:12px 12px; transition:.3s; }
+#animeFilter:hover{ box-shadow:0 0 10px var(--neon); border-color:#ff80a0; }
+#animeFilter:focus{ box-shadow:0 0 14px var(--neon); border-color:var(--neon); }
+
+.profile-row{ display:flex; justify-content:space-between; margin:10px 0; }
+.token{color:var(--neon); font-weight:700}
+
+.characters-wrapper{ max-height:50vh; overflow-y:auto; padding-right:6px; }
+.characters-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.char-card{text-align:center; opacity:0; animation:fadeInCard .4s forwards; }
+@keyframes fadeInCard{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.avatar{ width:60px;height:60px; border-radius:50%; margin:0 auto 8px; background-size:cover; background-position:center; border:2px solid var(--neon); }
+.char-card p{ font-size:13px; opacity:.85; line-height:1.3; }
+
+.char-label{ font-size:12px; margin-top:4px; font-weight:600; padding:2px 6px; border-radius:8px; color:white; display:inline-block; }
+.dx-color{ background:var(--dx-color); }
+.hellsing-color{ background:var(--hellsing-color); }
+.spy-color{ background:var(--spy-color); }
+.user-color{ background:var(--user-color); }
+
+.chat-message{ padding:6px 10px; border-radius:12px; max-width:80%; word-wrap:break-word; color:white; margin-bottom:4px; display:flex; flex-direction:column; }
+.user-msg{ align-self:flex-end; background:var(--neon);}
+.bot-msg{ align-self:flex-start; background:#161a2a; border:1px solid var(--neon);}
+.cursor{ display:inline-block; color:var(--neon); margin-left:2px; font-weight:bold; }
+
+@media (max-width:420px){
+  .characters-grid{ grid-template-columns:1fr; }
 }
 </style>
 </head>
 <body>
+<div class="app">
 
-<h2>Чат с ИИ</h2>
-<div id="chatWindow"></div>
-<div>
+  <div id="menu" class="screen active">
+    <h1 class="title">HAKKA</h1>
+    <button onclick="openProfile()">Профиль</button>
+    <button onclick="openCharacters()">Персонажи</button>
+    <button onclick="openWorkshop()">Мастерская</button>
+    <button onclick="claimDaily()">Ежедневная награда</button>
+  </div>
+
+  <div id="profile" class="screen">
+    <h1 class="title">Профиль</h1>
+    <div class="profile-row">
+      <span>Ник:</span><input id="nickname" type="text">
+    </div>
+    <div class="profile-row">
+      <span>Токены:</span><span id="tokens" class="token"></span>
+    </div>
+    <div id="adminControls" style="display:none;">
+      <button onclick="addAdminTokens()">+100 токенов (Админ)</button>
+    </div>
+    <button onclick="saveProfile()">Сохранить профиль</button>
+    <button onclick="goMenu()">Назад</button>
+  </div>
+
+  <div id="characters" class="screen">
+    <h1 class="title">Персонажи</h1>
+    <select id="animeFilter" onchange="renderCharacters()">
+      <option value="all">Все</option>
+      <option value="Хеллсинг">Хеллсинг</option>
+      <option value="Старшая Школа DXD">Старшая Школа DXD</option>
+      <option value="Семья Шпиона">Семья Шпиона</option>
+      <option value="Пользовательские">Пользовательские</option>
+    </select>
+    <div class="characters-wrapper">
+      <div id="charactersGrid" class="characters-grid"></div>
+    </div>
+    <button onclick="goMenu()">Назад</button>
+  </div>
+
+  <div id="chat" class="screen">
+    <h1 class="title" id="chatTitle">Чат</h1>
+    <div id="chatWindow" class="characters-wrapper"></div>
     <input id="userMessage" type="text" placeholder="Напиши сообщение...">
     <button onclick="sendMessage()">Отправить</button>
+    <button onclick="goCharacters()">Назад</button>
+  </div>
+
 </div>
 
 <script>
-let activeChar = "Алукард"; // Можешь сменить на любого персонажа
+// ==== ДАННЫЕ ПЕРСОНАЖЕЙ ====
+const canonChars = [
+  {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями.", avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg", anime:"Хеллсинг"},
+  {name:"Серас Виктория", desc:"Бывшая полицейская, ставшая вампиршей. Сильная и заботливая.", avatar:"https://avatars.mds.yandex.net/i?id=baf2a72f11162bd2c0f31908cd79b03170b017ae-16922605-images-thumbs&n=13", anime:"Хеллсинг"},
+  {name:"Интегра Хеллсинг", desc:"Лидер организации Хеллсинг. Строга и справедлива.", avatar:"https://tse4.mm.bing.net/th/id/OIP.ryA9tvA5aVlvzyWATzzqSgHaEE?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Хеллсинг"},
+  {name:"Риас Гремори", desc:"Харизматичная демонесса, любит интриги.", avatar:"https://zefirka.club/uploads/posts/2022-09/1662219894_4-zefirka-club-p-rias-gremori-na-avu-5.jpg", anime:"Старшая Школа DXD"},
+  {name:"Акено Химэдзима", desc:"Энергичная жрица молний.", avatar:"https://tse2.mm.bing.net/th/id/OIP.khPZy1V5b1ahtbPtQ6nbSgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Старшая Школа DXD"},
+  {name:"Лойд Форджер", desc:"Хладнокровный шпион.", avatar:"https://i.pinimg.com/736x/e8/01/c2/e801c2db5c32af8ab7fec82eb2bd51cf.jpg", anime:"Семья Шпиона"},
+  {name:"Йор Форджер", desc:"Смертоносная убийца, скрывает эмоции.", avatar:"https://tse4.mm.bing.net/th/id/OIP.yzvjrPUBd16irp115FE_xQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3", anime:"Семья Шпиона"}
+];
 
-function sendMessage(){
-    const msgInput = document.getElementById("userMessage");
-    const msg = msgInput.value.trim();
-    if(!msg) return;
+const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || { nick:"Игрок", tokens:100, lastDaily:0 };
+let activeChar = null;
 
-    const chatWin = document.getElementById("chatWindow");
+// ==== Функции ====
+function getUserChars(){ return JSON.parse(localStorage.getItem("customChars_"+profile.nick)) || []; }
+function saveUserChars(chars){ localStorage.setItem("customChars_"+profile.nick, JSON.stringify(chars)); }
 
-    // Добавляем сообщение пользователя
-    const userBlock = document.createElement("div");
-    userBlock.className = "chat-message user-msg";
-    userBlock.textContent = msg;
-    chatWin.appendChild(userBlock);
-    chatWin.scrollTop = chatWin.scrollHeight;
+function openProfile(){ showScreen("profile"); document.getElementById("nickname").value=profile.nick; document.getElementById("tokens").textContent=profile.tokens; checkAdmin(); }
+function saveProfile(){ profile.nick=document.getElementById("nickname").value||"Игрок"; localStorage.setItem("hakkaProfile",JSON.stringify(profile)); alert("Профиль сохранён"); checkAdmin(); }
+function openCharacters(){ showScreen("characters"); renderCharacters(); }
+function goCharacters(){ activeChar=null; showScreen("characters"); }
+function openWorkshop(){ showScreen("workshop"); }
+function goMenu(){ showScreen("menu"); }
 
-    msgInput.value = "";
+function renderCharacters(){
+  const grid=document.getElementById("charactersGrid");
+  const filter=document.getElementById("animeFilter").value;
+  grid.innerHTML="";
+  let charsToShow=[...canonChars];
+  const userChars=getUserChars();
 
-    // Отправка на сервер ИИ через ngrok
-    fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            message: msg,
-            character: activeChar,
-            description: "Древний бессмертный вампир с невероятной силой и мистическими способностями."
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        const botReply = data.answer || "(ИИ временно недоступен)";
-        const botBlock = document.createElement("div");
-        botBlock.className = "chat-message bot-msg";
-        botBlock.textContent = botReply;
-        chatWin.appendChild(botBlock);
-        chatWin.scrollTop = chatWin.scrollHeight;
-    })
-    .catch(() => {
-        const botBlock = document.createElement("div");
-        botBlock.className = "chat-message bot-msg";
-        botBlock.textContent = "(Ошибка соединения с ИИ)";
-        chatWin.appendChild(botBlock);
-        chatWin.scrollTop = chatWin.scrollHeight;
-    });
+  if(filter==="Пользовательские") charsToShow=userChars;
+  else if(filter!=="all") charsToShow=charsToShow.filter(c=>c.anime===filter);
+  if(filter==="all") charsToShow.push(...userChars.map(c=>({...c, anime:"Пользовательские"})));
+
+  charsToShow.forEach(c=>{
+    let colorClass="user-color";
+    if(c.anime==="Старшая Школа DXD") colorClass="dx-color";
+    else if(c.anime==="Хеллсинг") colorClass="hellsing-color";
+    else if(c.anime==="Семья Шпиона") colorClass="spy-color";
+    grid.innerHTML+=`
+      <div class="card char-card">
+        <div class="avatar" style="background-image:url('${c.avatar}')"></div>
+        <strong>${c.name}</strong>
+        <div class="char-label ${colorClass}">${c.anime}</div>
+        <p>${c.desc}</p>
+        <button onclick="openChat('${c.name}')">💬 Написать</button>
+      </div>`;
+  });
 }
-</script>
 
+// ==== Чат ====
+function openChat(charName){ activeChar=charName; showScreen("chat"); renderSavedChat(charName); document.getElementById("chatTitle").textContent=`Чат с ${charName}`; }
+function sendMessage(){
+  const msgInput=document.getElementById("userMessage");
+  const msg=msgInput.value.trim();
+  if(!msg)return;
+  if(profile.tokens<1){alert("Недостаточно токенов!"); return;}
+
+  const chatWin=document.getElementById("chatWindow");
+  const userBlock=document.createElement("div");
+  userBlock.className="chat-message user-msg"; userBlock.textContent=msg; chatWin.appendChild(userBlock);
+  chatWin.scrollTop=chatWin.scrollHeight; saveChatMessage(activeChar, "user", msg);
+
+  const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
+  if(!char) return;
+
+  profile.tokens--; 
+  localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+  document.getElementById("tokens").textContent=profile.tokens;
+
+  fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ message: msg, character: char.name, description: char.desc })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    const botReply=data.answer || `Я ${char.name} слышу твоё сообщение: "${msg}"`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
+  })
+  .catch(()=>{
+    const botReply=`Я ${char.name} слышу твоё сообщение: "${msg}" (ИИ временно недоступен)`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
+  });
+}
+
+function typeBotMessage(botReply, chatWin){
+  const botBlock=document.createElement("div");
+  botBlock.className="chat-message bot-msg"; botBlock.style.opacity=0;
+  const textElem=document.createElement("span"); textElem.className="typing-text";
+  const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="|";
+  botBlock.appendChild(textElem); botBlock.appendChild(cursor); chatWin.appendChild(botBlock);
+  setTimeout(()=>botBlock.style.opacity=1,50);
+  let i=0;
+  const cursorBlink=setInterval(()=>{ cursor.style.visibility=(cursor.style.visibility==='visible')?'hidden':'visible'; },500);
+  function typeWriter(){
+    if(i<botReply.length){ textElem.textContent+=botReply[i]; i++; chatWin.scrollTop=chatWin.scrollHeight; setTimeout(typeWriter,30);}
+    else{ clearInterval(cursorBlink); cursor.remove(); }
+  }
+  typeWriter();
+}
+
+// ==== Сохранение чата ====
+function saveChatMessage(charName, sender, msg){
+  let chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
+  chats.push({sender,msg});
+  localStorage.setItem("chat_"+profile.nick+"_"+charName,JSON.stringify(chats));
+}
+function renderSavedChat(charName){
+  const chatWin=document.getElementById("chatWindow"); chatWin.innerHTML="";
+  let chats=JSON.parse(localStorage.getItem("chat_"+profile.nick+"_"+charName))||[];
+  chats.forEach(c=>{
+    const div=document.createElement("div");
+    div.className="chat-message "+(c.sender==="user"?"user-msg":"bot-msg"); div.textContent=c.msg; chatWin.appendChild(div);
+  });
+  chatWin.scrollTop=chatWin.scrollHeight;
+}
+function clearChat(){ if(activeChar){ localStorage.removeItem("chat_"+profile.nick+"_"+activeChar); renderSavedChat(activeChar); } }
+
+// ==== Админ ====
+const adminNick="Расул";
+function checkAdmin(){ document.getElementById("adminControls").style.display=(profile.nick===adminNick)?"block":"none"; }
+function addAdminTokens(){ profile.tokens+=100; localStorage.setItem("hakkaProfile",JSON.stringify(profile)); document.getElementById("tokens").textContent=profile.tokens; alert("Токены выданы!"); }
+
+// ==== Ежедневная награда ====
+function claimDaily(){
+  const now=Date.now();
+  if(now-profile.lastDaily>=24*60*60*1000){
+    profile.tokens+=50; profile.lastDaily=now;
+    localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+    document.getElementById("tokens").textContent=profile.tokens;
+    alert("Ежедневная награда: +50 токенов!");
+  }else{
+    const next=Math.ceil((24*60*60*1000-(now-profile.lastDaily))/1000/60);
+    alert(`Награда уже получена! Ждите ещё ${next} минут.`);
+  }
+}
+
+// ==== Утилиты ====
+function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
+
+</script>
 </body>
 </html>
