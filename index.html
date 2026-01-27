@@ -118,88 +118,6 @@ textarea{resize:none;height:70px}
 <body>
 
 <script>
-for(let i=0;i<50;i++){
-  const p=document.createElement("div");
-  p.class
-
-Name="particle";
-  p.style.left=Math.random()*100+"vw";
-  p.style.animationDuration=10+Math.random()*10+"s";
-  p.style.opacity=Math.random();
-  document.body.appendChild(p);
-}
-</script>
-
-<div class="app">
-
-<!-- МЕНЮ -->
-<div id="menu" class="screen active">
-  <div class="title">Hakka AI</div>
-  <div class="card"><button onclick="openProfile()">👤 Профиль</button></div>
-  <div class="card"><button onclick="openCharacters()">🎮 Персонажи</button></div>
-  <div class="card"><button onclick="openWorkshop()">⚒ Мастерская</button></div>
-</div>
-
-<!-- ПРОФИЛЬ -->
-<div id="profile" class="screen">
-  <div class="title">Профиль</div>
-  <input id="nickname" placeholder="Ник пользователя">
-  <div class="profile-row">
-    <span>Токены</span>
-    <span class="token" id="tokens">0</span>
-  </div>
-  <!-- Админская кнопка -->
-  <div id="adminControls" style="display:none; margin-top:10px;">
-    <button onclick="addAdminTokens()">Выдать себе токены (+100)</button>
-  </div>
-  <button onclick="saveProfile()">Сохранить</button>
-  <button onclick="goMenu()" style="margin-top:10px;">Назад</button>
-</div>
-
-<!-- ПЕРСОНАЖИ -->
-<div id="characters" class="screen">
-  <div class="title">Персонажи</div>
-  <div style="margin-bottom:12px;">
-    <select id="animeFilter" onchange="renderCharacters()">
-      <option value="all">Все аниме</option>
-      <option value="Хеллсинг">Хеллсинг</option>
-      <option value="Старшая Школа DXD">Старшая Школа DXD</option>
-      <option value="Семья Шпиона">Семья Шпиона</option>
-      <option value="Пользовательские">Ваши персонажи</option>
-    </select>
-  </div>
-  <div class="characters-wrapper">
-    <div class="characters-grid" id="charactersGrid"></div>
-  </div>
-  <button onclick="goMenu()" style="margin-top:14px;">Назад</button>
-</div>
-
-<!-- МАСТЕРСКАЯ -->
-<div id="workshop" class="screen">
-  <div class="title">Мастерская</div>
-  <div class="card">
-    <strong>Создание персонажа (100 токенов)</strong>
-    <input id="charName" placeholder="Имя персонажа">
-    <textarea id="charDesc" placeholder="Описание персонажа"></textarea>
-    <input id="charAvatar" placeholder="URL аватарки">
-    <button onclick="createCharacter()" style="margin-top:10px;">Создать</button>
-  </div>
-  <button onclick="goMenu()">Назад</button>
-</div>
-
-<!-- ЧАТ -->
-<div id="chat" class="screen">
-  <div class="title">Чат с персонажем</div>
-  <div class="characters-wrapper" id="chatWindow" style="max-height:50vh; display:flex; flex-direction:column; gap:6px;"></div>
-  <input id="userMessage" placeholder="Напишите сообщение...">
-  <button onclick="sendMessage()" style="margin-top:6px;">Отправить (-1 токен)</button>
-  <button onclick="goCharacters()" style="margin-top:10px;">Назад</button>
-  <button onclick="clearChat()" style="margin-top:6px;background:#8a2be2;">Очистить чат</button>
-</div>
-
-</div>
-
-<script>
 // ==== ДАННЫЕ ПЕРСОНАЖЕЙ ====
 const canonChars = [
   {name:"Алукард", desc:"Древний бессмертный вампир с невероятной силой и мистическими способностями.", avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg", anime:"Хеллсинг"},
@@ -275,42 +193,44 @@ function sendMessage(){
   if(profile.tokens<1){alert("Недостаточно токенов!"); return;}
 
   const chatWin=document.getElementById("chatWindow");
+  
+  // Сообщение пользователя
   const userBlock=document.createElement("div");
   userBlock.className="chat-message user-msg";
   userBlock.textContent=msg;
   chatWin.appendChild(userBlock);
-  msgInput.value=""; chatWin.scrollTop=chatWin.scrollHeight;
-
+  chatWin.scrollTop=chatWin.scrollHeight;
+  saveChatMessage(activeChar, "user", msg);
+  
   const char = [...canonChars, ...getUserChars()].find(c => c.name === activeChar);
   if(!char) return;
 
-  // Запрос к ИИ
-fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    message: msg,
-    character: char.name,
-    description: char.desc
-  })
-})
-.then(res => res.json())
-.then(data => {
-  const botReply = data.answer || "Я задумалась...";
-
-  typeBotMessage(botReply, chatWin);
-  saveChatMessage(activeChar, "bot", botReply);
-})
-.catch(() => {
-  typeBotMessage("Ошибка связи с ИИ 😢", chatWin);
-});
-
-  profile.tokens--; localStorage.setItem("hakkaProfile",JSON.stringify(profile));
+  // Уменьшаем токены
+  profile.tokens--; 
+  localStorage.setItem("hakkaProfile",JSON.stringify(profile));
   document.getElementById("tokens").textContent=profile.tokens;
 
-  typeBotMessage(botReply, chatWin);
-  saveChatMessage(activeChar, "user", msg);
-  saveChatMessage(activeChar, "bot", botReply);
+  // Запрос к серверу ИИ
+  fetch("https://shelba-hardenable-bell.ngrok-free.dev/ask", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: msg,
+      character: char.name,
+      description: char.desc
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const botReply = data.answer || `Я ${char.name} слышу твое сообщение: "${msg}" (ИИ временно недоступен)`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
+  })
+  .catch(() => {
+    const botReply = `Я ${char.name} слышу твое сообщение: "${msg}" (ИИ временно недоступен)`;
+    typeBotMessage(botReply, chatWin);
+    saveChatMessage(activeChar, "bot", botReply);
+  });
 }
 
 function typeBotMessage(botReply, chatWin){
@@ -370,6 +290,7 @@ function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.class
 
 </body>
 </html>
+
 
 
 
