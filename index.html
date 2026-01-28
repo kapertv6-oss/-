@@ -5,13 +5,76 @@
 <title>HAKKA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- СТИЛИ НЕ ТРОНУТЫ -->
+
+<style>
+/* ===== ТВОЙ CSS — НЕ ТРОНУТ ===== */
+:root{
+  --bg:#0b0d14;
+  --neon:#ff4d6d;
+  --text:#f2f2f2;
+  --card1:#161a2a;
+  --card2:#0f1220;
+  --dx-color:#ff8c00;
+  --hellsing-color:#8a2be2;
+  --spy-color:#00ced1;
+  --user-color:#ff69b4;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Segoe UI, sans-serif;
+  background:radial-gradient(circle at top,#14182a,var(--bg));
+  color:var(--text);
+  min-height:100vh;
+  overflow-y:auto;
+}
+body::-webkit-scrollbar{width:8px;}
+body::-webkit-scrollbar-thumb{background:var(--neon);border-radius:8px;}
+.app{max-width:420px;margin:auto;padding:16px;}
+.screen{display:none;animation:fade .3s ease;}
+.screen.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;}}
+.title{text-align:center;font-size:24px;font-weight:700;color:var(--neon);margin-bottom:16px;}
+.card{
+  background:linear-gradient(180deg,var(--card1),var(--card2));
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:14px;
+  transition:.3s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 0 16px rgba(255,77,109,.4);}
+button{
+  background:var(--neon);
+  border:none;
+  color:white;
+  padding:10px;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  width:100%;
+  margin-top:8px;
+}
+input,textarea{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  background:#161a2a;
+  color:white;
+}
+textarea{resize:none;height:70px}
+.chat-message{padding:6px 10px;border-radius:12px;max-width:80%;margin-bottom:6px;}
+.user-msg{align-self:flex-end;background:var(--neon);}
+.bot-msg{align-self:flex-start;background:#161a2a;border:1px solid var(--neon);}
+.cursor{color:var(--neon);font-weight:bold;}
+</style>
 </head>
 
 <body>
 <div class="app">
 
-<!-- МЕНЮ -->
+<!-- ===== МЕНЮ ===== -->
 <div id="menu" class="screen active">
   <h1 class="title">HAKKA</h1>
   <button onclick="openProfile()">Профиль</button>
@@ -19,25 +82,33 @@
   <button onclick="openWorkshop()">Мастерская</button>
 </div>
 
-<!-- МАСТЕРСКАЯ -->
+<!-- ===== МАСТЕРСКАЯ ===== -->
 <div id="workshop" class="screen">
-  <h1 class="title">Создание персонажа</h1>
+  <h1 class="title">Мастерская</h1>
 
-  <input id="charName" placeholder="Имя персонажа">
-  <textarea id="charDesc" placeholder="Описание"></textarea>
-  <input id="charAvatar" placeholder="URL аватара">
+  <div class="card">
+    <strong>Создание персонажа</strong>
+    <input id="charName" placeholder="Имя">
+    <textarea id="charDesc" placeholder="Описание"></textarea>
+    <input id="charAvatar" placeholder="URL аватара">
+    <button onclick="createCharacter()">Создать</button>
+  </div>
 
-  <button onclick="createCharacter()">Создать</button>
+  <div class="card">
+    <strong style="color:var(--neon)">🚧 Скоро</strong>
+    <p style="opacity:.85">Дополнительные инструменты в разработке</p>
+  </div>
+
   <button onclick="goMenu()">Назад</button>
 </div>
 
-<!-- ЧАТ -->
+<!-- ===== ЧАТ ===== -->
 <div id="chat" class="screen">
   <h1 class="title" id="chatTitle"></h1>
-  <div id="chatWindow" class="characters-wrapper"></div>
-  <input id="userMessage" placeholder="Сообщение">
+  <div id="chatWindow" style="display:flex;flex-direction:column;"></div>
+  <input id="userMessage" placeholder="Напиши сообщение...">
   <button onclick="sendMessage()">Отправить</button>
-  <button onclick="goCharacters()">Назад</button>
+  <button onclick="goMenu()">Назад</button>
 </div>
 
 </div>
@@ -46,75 +117,74 @@
 Telegram.WebApp.ready();
 Telegram.WebApp.expand();
 
-const API = "https://ТВОЙ-ДОМЕН";
+const API = "https://ТВОЙ-ДОМЕН"; // backend
 
 const profile = JSON.parse(localStorage.getItem("hakkaProfile"))
-  || { nick: "Игрок", tokens: 100 };
+  || { nick:"Игрок" };
 
 let activeChar = null;
 
-// ---------- МАСТЕРСКАЯ ----------
+/* ===== МАСТЕРСКАЯ ===== */
+function openWorkshop(){ showScreen("workshop"); }
 
 function createCharacter(){
-  fetch(API + "/character/create", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      user: profile.nick,
-      name: charName.value,
-      description: charDesc.value,
-      avatar: charAvatar.value
+  fetch(API+"/character/create",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      user:profile.nick,
+      name:charName.value,
+      description:charDesc.value,
+      avatar:charAvatar.value
     })
   }).then(()=>alert("Персонаж создан!"));
 }
 
-// ---------- ЧАТ ----------
-
+/* ===== ЧАТ ===== */
 function openChat(name){
-  activeChar = name;
+  activeChar=name;
   showScreen("chat");
-  chatTitle.textContent = "Чат с " + name;
+  chatTitle.textContent="Чат с "+name;
   loadChat();
 }
 
 function sendMessage(){
-  const msg = userMessage.value.trim();
-  if(!msg) return;
+  const msg=userMessage.value.trim();
+  if(!msg)return;
+  addMsg("user",msg);
+  saveMsg("user",msg);
 
-  addMsg("user", msg);
-  saveMsg("user", msg);
-
-  fetch(API + "/ask", {
+  fetch(API+"/ask",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ message: msg, character: activeChar })
+    body:JSON.stringify({message:msg,character:activeChar})
   })
   .then(r=>r.json())
   .then(d=>{
-    addMsg("bot", d.answer);
-    saveMsg("bot", d.answer);
+    addMsg("bot",d.answer);
+    saveMsg("bot",d.answer);
   });
 
-  userMessage.value = "";
+  userMessage.value="";
 }
 
-function addMsg(type, text){
-  const div = document.createElement("div");
-  div.className = "chat-message " + (type==="user"?"user-msg":"bot-msg");
-  div.textContent = text;
+function addMsg(type,text){
+  const div=document.createElement("div");
+  div.className="chat-message "+(type==="user"?"user-msg":"bot-msg");
+  div.textContent=text;
   chatWindow.appendChild(div);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
+  chatWindow.scrollTop=chatWindow.scrollHeight;
 }
 
-function saveMsg(sender, msg){
-  fetch(API + "/chat/save", {
+function saveMsg(sender,msg){
+  fetch(API+"/chat/save",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
-      user: profile.nick,
-      character: activeChar,
+      user:profile.nick,
+      character:activeChar,
       sender,
-      message: msg
+      message:msg
     })
   });
 }
@@ -124,18 +194,17 @@ function loadChat(){
     .then(r=>r.json())
     .then(list=>{
       chatWindow.innerHTML="";
-      list.forEach(m=>addMsg(m.sender, m.msg));
+      list.forEach(m=>addMsg(m.sender,m.msg));
     });
 }
 
-// ---------- UI ----------
-
-function openWorkshop(){ showScreen("workshop"); }
-function goMenu(){ showScreen("menu"); }
+/* ===== УТИЛИТЫ ===== */
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
+function goMenu(){ showScreen("menu"); }
 </script>
+
 </body>
 </html>
