@@ -7,7 +7,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-/* ===== ТВОЙ CSS — НЕ ТРОНУТ ===== */
 :root{
   --bg:#0b0d14;
   --neon:#ff4d6d;
@@ -22,7 +21,7 @@
 *{box-sizing:border-box;}
 body{
   margin:0;
-  font-family:Segoe UI, sans-serif;
+  font-family:Segoe UI,sans-serif;
   background:radial-gradient(circle at top,#14182a,var(--bg));
   color:var(--text);
   min-height:100vh;
@@ -35,6 +34,7 @@ body::-webkit-scrollbar-thumb{background:var(--neon);border-radius:8px;}
 .screen.active{display:block;}
 @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;}}
 .title{text-align:center;font-size:24px;font-weight:700;color:var(--neon);margin-bottom:16px;}
+
 .card{
   background:linear-gradient(180deg,var(--card1),var(--card2));
   border-radius:16px;
@@ -43,6 +43,7 @@ body::-webkit-scrollbar-thumb{background:var(--neon);border-radius:8px;}
   transition:.3s;
 }
 .card:hover{transform:translateY(-2px);box-shadow:0 0 16px rgba(255,77,109,.4);}
+
 button{
   background:var(--neon);
   border:none;
@@ -54,6 +55,7 @@ button{
   width:100%;
   margin-top:8px;
 }
+
 input,textarea{
   width:100%;
   margin-top:8px;
@@ -64,10 +66,29 @@ input,textarea{
   color:white;
 }
 textarea{resize:none;height:70px}
-.chat-message{padding:6px 10px;border-radius:12px;max-width:80%;margin-bottom:6px;}
+
+.characters-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.avatar{
+  width:60px;height:60px;border-radius:50%;
+  background-size:cover;background-position:center;
+  border:2px solid var(--neon);
+  margin:0 auto 6px;
+}
+
+.chat-message{
+  padding:6px 10px;
+  border-radius:12px;
+  max-width:80%;
+  margin-bottom:6px;
+  word-wrap:break-word;
+}
 .user-msg{align-self:flex-end;background:var(--neon);}
 .bot-msg{align-self:flex-start;background:#161a2a;border:1px solid var(--neon);}
 .cursor{color:var(--neon);font-weight:bold;}
+
+@media(max-width:420px){
+  .characters-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 
@@ -77,9 +98,15 @@ textarea{resize:none;height:70px}
 <!-- ===== МЕНЮ ===== -->
 <div id="menu" class="screen active">
   <h1 class="title">HAKKA</h1>
-  <button onclick="openProfile()">Профиль</button>
   <button onclick="openCharacters()">Персонажи</button>
   <button onclick="openWorkshop()">Мастерская</button>
+</div>
+
+<!-- ===== ПЕРСОНАЖИ ===== -->
+<div id="characters" class="screen">
+  <h1 class="title">Персонажи</h1>
+  <div id="charactersGrid" class="characters-grid"></div>
+  <button onclick="goMenu()">Назад</button>
 </div>
 
 <!-- ===== МАСТЕРСКАЯ ===== -->
@@ -96,7 +123,7 @@ textarea{resize:none;height:70px}
 
   <div class="card">
     <strong style="color:var(--neon)">🚧 Скоро</strong>
-    <p style="opacity:.85">Дополнительные инструменты в разработке</p>
+    <p style="opacity:.85">Дополнительные функции в разработке</p>
   </div>
 
   <button onclick="goMenu()">Назад</button>
@@ -108,7 +135,7 @@ textarea{resize:none;height:70px}
   <div id="chatWindow" style="display:flex;flex-direction:column;"></div>
   <input id="userMessage" placeholder="Напиши сообщение...">
   <button onclick="sendMessage()">Отправить</button>
-  <button onclick="goMenu()">Назад</button>
+  <button onclick="goCharacters()">Назад</button>
 </div>
 
 </div>
@@ -117,93 +144,148 @@ textarea{resize:none;height:70px}
 Telegram.WebApp.ready();
 Telegram.WebApp.expand();
 
-const API = "https://ТВОЙ-ДОМЕН"; // backend
+const API = "https://ТВОЙ-ДОМЕН";
 
-const profile = JSON.parse(localStorage.getItem("hakkaProfile"))
-  || { nick:"Игрок" };
+/* ===== КАНОН ПЕРСОНАЖЕЙ (ТВОИ) ===== */
+const canonChars = [
+ {name:"Алукард",desc:"Древний бессмертный вампир.",avatar:"https://i.pinimg.com/736x/ed/ba/36/edba369f339eb95915ea915a8b48eb2e.jpg"},
+ {name:"Риас Гремори",desc:"Харизматичная демонесса.",avatar:"https://zefirka.club/uploads/posts/2022-09/1662219894_4-zefirka-club-p-rias-gremori-na-avu-5.jpg"}
+];
 
-let activeChar = null;
+const profile = JSON.parse(localStorage.getItem("hakkaProfile")) || {nick:"Игрок"};
+let activeChar=null;
 
-/* ===== МАСТЕРСКАЯ ===== */
-function openWorkshop(){ showScreen("workshop"); }
+/* ===== ПЕРСОНАЖИ ===== */
+function openCharacters(){
+ showScreen("characters");
+ renderCharacters();
+}
 
-function createCharacter(){
-  fetch(API+"/character/create",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      user:profile.nick,
-      name:charName.value,
-      description:charDesc.value,
-      avatar:charAvatar.value
-    })
-  }).then(()=>alert("Персонаж создан!"));
+function renderCharacters(){
+ const grid=document.getElementById("charactersGrid");
+ grid.innerHTML="";
+
+ canonChars.forEach(c=>renderCard(c));
+
+ fetch(API+"/character/list/"+profile.nick)
+   .then(r=>r.json())
+   .then(list=>list.forEach(c=>renderCard(c)));
+}
+
+function renderCard(c){
+ const div=document.createElement("div");
+ div.className="card";
+ div.innerHTML=`
+  <div class="avatar" style="background-image:url('${c.avatar}')"></div>
+  <strong>${c.name}</strong>
+  <p style="opacity:.8">${c.desc}</p>
+  <button onclick="openChat('${c.name}')">💬 Написать</button>
+ `;
+ charactersGrid.appendChild(div);
 }
 
 /* ===== ЧАТ ===== */
 function openChat(name){
-  activeChar=name;
-  showScreen("chat");
-  chatTitle.textContent="Чат с "+name;
-  loadChat();
+ activeChar=name;
+ showScreen("chat");
+ chatTitle.textContent="Чат с "+name;
+ loadChat();
 }
 
 function sendMessage(){
-  const msg=userMessage.value.trim();
-  if(!msg)return;
-  addMsg("user",msg);
-  saveMsg("user",msg);
+ const msg=userMessage.value.trim();
+ if(!msg)return;
 
-  fetch(API+"/ask",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:msg,character:activeChar})
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    addMsg("bot",d.answer);
-    saveMsg("bot",d.answer);
-  });
+ addMsg("user",msg);
+ saveMsg("user",msg);
 
-  userMessage.value="";
+ fetch(API+"/ask",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({message:msg,character:activeChar})
+ })
+ .then(r=>r.json())
+ .then(d=>{
+  typeBotMessage(d.answer);
+  saveMsg("bot",d.answer);
+ });
+
+ userMessage.value="";
 }
 
 function addMsg(type,text){
-  const div=document.createElement("div");
-  div.className="chat-message "+(type==="user"?"user-msg":"bot-msg");
-  div.textContent=text;
-  chatWindow.appendChild(div);
-  chatWindow.scrollTop=chatWindow.scrollHeight;
+ const div=document.createElement("div");
+ div.className="chat-message "+(type==="user"?"user-msg":"bot-msg");
+ div.textContent=text;
+ chatWindow.appendChild(div);
+ chatWindow.scrollTop=chatWindow.scrollHeight;
 }
 
+function typeBotMessage(text){
+ const block=document.createElement("div");
+ block.className="chat-message bot-msg";
+ const span=document.createElement("span");
+ const cursor=document.createElement("span");
+ cursor.className="cursor";cursor.textContent="|";
+ block.append(span,cursor);
+ chatWindow.appendChild(block);
+
+ let i=0;
+ (function type(){
+  if(i<text.length){
+   span.textContent+=text[i++];
+   chatWindow.scrollTop=chatWindow.scrollHeight;
+   setTimeout(type,30);
+  }else cursor.remove();
+ })();
+}
+
+/* ===== СЕРВЕР ===== */
 function saveMsg(sender,msg){
-  fetch(API+"/chat/save",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      user:profile.nick,
-      character:activeChar,
-      sender,
-      message:msg
-    })
-  });
+ fetch(API+"/chat/save",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   user:profile.nick,
+   character:activeChar,
+   sender,
+   message:msg
+  })
+ });
 }
 
 function loadChat(){
-  fetch(`${API}/chat/load?user=${profile.nick}&character=${activeChar}`)
-    .then(r=>r.json())
-    .then(list=>{
-      chatWindow.innerHTML="";
-      list.forEach(m=>addMsg(m.sender,m.msg));
-    });
+ fetch(`${API}/chat/load?user=${profile.nick}&character=${activeChar}`)
+ .then(r=>r.json())
+ .then(list=>{
+  chatWindow.innerHTML="";
+  list.forEach(m=>addMsg(m.sender,m.msg));
+ });
+}
+
+/* ===== МАСТЕРСКАЯ ===== */
+function openWorkshop(){showScreen("workshop");}
+
+function createCharacter(){
+ fetch(API+"/character/create",{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   user:profile.nick,
+   name:charName.value,
+   description:charDesc.value,
+   avatar:charAvatar.value
+  })
+ }).then(()=>alert("Персонаж создан!"));
 }
 
 /* ===== УТИЛИТЫ ===== */
 function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
 }
-function goMenu(){ showScreen("menu"); }
+function goMenu(){showScreen("menu");}
+function goCharacters(){showScreen("characters");}
 </script>
 
 </body>
