@@ -2,282 +2,244 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>AnimeHub: Cinema Mode</title>
+    <title>AnimeHub | Profile Editor</title>
     <style>
-        :root { --bg: #0a0a0c; --card: #15151a; --accent: #ff4757; --text: #fff; --gold: #ffd700; --panel: #111; }
+        :root { --bg: #0a0a0c; --card: #15151a; --accent: #ff4757; --text: #fff; --panel: #111; --gold: #ffd700; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
-        #notify-container { position: fixed; top: 20px; right: 20px; z-index: 10000; width: 300px; }
-        .toast { background: #1a1a1a; color: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        #notify-box { position: fixed; top: 70px; right: 20px; z-index: 9999; pointer-events: none; }
+        .toast { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(255,71,87,0.4); animation: slide 0.3s ease forwards; pointer-events: auto; }
+        @keyframes slide { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
-        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: none; justify-content: center; align-items: center; }
-        .auth-box { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center; width: 320px; }
-        
-        nav { display: flex; justify-content: space-between; padding: 10px 5%; background: var(--panel); border-bottom: 1px solid #222; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        .search-box input { width: 250px; padding: 8px 15px; border-radius: 20px; border: 1px solid #333; background: #000; color: #fff; outline: none; }
-        
-        .container { padding: 20px 5%; }
-        .panel { display: none; background: var(--panel); padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; }
+        nav { display: none; justify-content: space-between; padding: 10px 5%; background: var(--panel); border-bottom: 1px solid #222; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .nav-links { display: flex; gap: 15px; }
+        .nav-links span { cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .nav-links span:hover { color: var(--accent); }
+
+        .container { padding: 20px 5%; display: none; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
-        
         .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; transition: 0.3s; position: relative; }
         .card:hover { border-color: var(--accent); transform: translateY(-5px); }
         .card img { width: 100%; height: 280px; object-fit: cover; }
-        .card-info { padding: 12px; text-align: center; }
-
-        .stars { font-size: 18px; margin-top: 5px; color: #444; }
-        .stars span.active { color: var(--gold); }
-        .rating-num { font-size: 13px; color: var(--gold); margin-left: 5px; font-weight: bold; }
-
-        .del-btn { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; display: none; z-index: 10; }
-        .card:hover .del-btn { display: block; }
-
-        /* МОДАЛЬНОЕ ОКНО С КОММЕНТАРИЯМИ */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; justify-content: center; align-items: center; }
-        .modal-layout { display: flex; width: 95%; max-width: 1200px; height: 85vh; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
         
-        .player-side { flex: 3; display: flex; flex-direction: column; background: #000; position: relative; }
-        .video-wrapper { flex: 1; position: relative; }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
-        .comment-side { flex: 1; border-left: 1px solid #222; display: flex; flex-direction: column; background: var(--panel); }
-        .comm-header { padding: 15px; border-bottom: 1px solid #222; font-weight: bold; display: flex; justify-content: space-between; }
-        .comm-list { flex: 1; overflow-y: auto; padding: 15px; font-size: 14px; }
-        .comm-item { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #222; }
-        .comm-user { color: var(--accent); font-weight: bold; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
-        .comm-input-area { padding: 15px; border-top: 1px solid #222; display: flex; gap: 5px; }
-        
-        input, button { padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; }
+        /* Панели */
+        .panel-box { background: #111; padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        input, button, textarea { padding: 10px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; margin: 5px 0; width: 100%; box-sizing: border-box; }
         button { background: var(--accent); border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-mini { width: auto; padding: 5px 15px; background: #222; margin: 0; }
+        button:hover { opacity: 0.8; }
+        .btn-mini { width: auto; padding: 5px 15px; background: #222; font-size: 12px; }
+
+        /* Модалка */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; justify-content: center; align-items: center; }
+        .modal-layout { display: flex; width: 95%; max-width: 1300px; height: 85vh; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
+        .video-side { flex: 3; display: flex; flex-direction: column; }
+        .video-wrapper { flex: 1; position: relative; }
+        .video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
     </style>
 </head>
 <body>
 
-<div id="notify-container"></div>
+<div id="notify-box"></div>
 
+<!-- Вход -->
 <div id="auth-screen">
-    <div class="auth-box">
+    <div style="background:var(--card); padding:30px; border-radius:15px; border:1px solid #333; text-align:center; width:320px;">
         <h2 id="auth-title">Вход</h2>
-        <input type="text" id="uName" placeholder="Логин">
-        <input type="password" id="uPass" placeholder="Пароль">
-        <button onclick="auth()" style="width: 100%">ВОЙТИ</button>
-        <p onclick="toggleAuthMode()" style="font-size: 12px; color: gray; cursor: pointer; margin-top: 15px;">Регистрация</p>
+        <input type="text" id="logName" placeholder="Логин">
+        <input type="password" id="logPass" placeholder="Пароль">
+        <button onclick="processAuth()">ВОЙТИ</button>
+        <p onclick="toggleMode()" style="font-size:12px; color:gray; cursor:pointer; margin-top:15px">Регистрация</p>
     </div>
 </div>
 
-<nav>
-    <h2 onclick="goHome()" style="cursor:pointer; margin:0">ANIME<span style="color:var(--accent)">HUB</span></h2>
-    <div class="search-box"><input type="text" id="searchInput" placeholder="Поиск..." oninput="handleSearch()"></div>
-    <div class="user-info" id="navUser" style="display:none; align-items:center; gap:10px">
-        <img src="" id="myAv" style="width:35px; height:35px; border-radius:50%; border:2px solid var(--accent); cursor:pointer" onclick="showSection('profile')">
-        <span id="userNameShow" style="font-size:14px; font-weight:bold"></span>
-        <button id="admBtn" class="btn-mini" style="display:none" onclick="showSection('admin')">Админ</button>
+<nav id="mainNav">
+    <h2 onclick="showSection('main')" style="cursor:pointer; margin:0">ANIME<span style="color:var(--accent)">HUB</span></h2>
+    <div class="nav-links">
+        <span onclick="showSection('main')">Каталог</span>
+        <span onclick="showSection('favs')">Избранное</span>
+        <span onclick="showSection('admin')" id="admBtn" style="display:none; color:var(--accent)">Админка</span>
+    </div>
+    <div class="user-info" style="display:flex; align-items:center; gap:10px">
+        <div style="text-align:right; font-size:12px"><b id="uNameShow"></b><br><span id="uIdShow" style="color:var(--accent)"></span></div>
+        <img id="myAv" onclick="showSection('profile')" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); cursor:pointer">
         <button class="btn-mini" onclick="logout()">Выход</button>
     </div>
 </nav>
 
-<div class="container">
-    <div id="sec-profile" class="panel">
-        <h3>Профиль</h3>
-        <input type="text" id="newAvUrl" placeholder="Ссылка на новый аватар (URL)">
-        <button onclick="changeAvatar()">Сохранить</button>
+<div class="container" id="mainContent">
+    <!-- Редактор Профиля -->
+    <div id="sec-profile" class="panel-box" style="display:none">
+        <h2>Настройки профиля</h2>
+        <div style="max-width:400px">
+            <label>Новое имя:</label>
+            <input type="text" id="editName" placeholder="Введите ник">
+            <button onclick="updateName()">Сменить имя</button>
+            <hr style="border:1px solid #222; margin:20px 0">
+            <label>Смена пароля:</label>
+            <input type="password" id="oldPass" placeholder="Старый пароль">
+            <input type="password" id="newPass" placeholder="Новый пароль">
+            <button onclick="updatePass()">Обновить пароль</button>
+        </div>
     </div>
 
-    <div id="sec-admin" class="panel">
+    <!-- Админка -->
+    <div id="sec-admin" class="panel-box" style="display:none">
         <h3>Добавить аниме</h3>
         <input type="text" id="a-title" placeholder="Название">
         <input type="text" id="a-poster" placeholder="Постер (URL)">
-        <input type="text" id="a-vid" placeholder="Ссылка на видео (src)">
-        <button onclick="addAnime()" style="width:100%">ОПУБЛИКОВАТЬ</button>
+        <textarea id="a-vids" placeholder="Ссылки на серии через запятую"></textarea>
+        <button onclick="addAnime()">ВЫЛОЖИТЬ</button>
     </div>
 
     <div id="sec-main" class="grid"></div>
+    <div id="sec-favs" class="grid" style="display:none"></div>
 </div>
 
-<!-- НОВЫЙ КИНОТЕАТР С ЧАТОМ -->
+<!-- Модалка Плеера -->
 <div id="playerModal" class="modal">
     <div class="modal-layout">
-        <div class="player-side">
-            <div class="comm-header" style="background: rgba(0,0,0,0.5)">
-                <span id="m-title">Название аниме</span>
-                <span onclick="closePlayer()" style="cursor:pointer; color:var(--accent)">Закрыть X</span>
+        <div class="video-side">
+            <div style="padding:15px; display:flex; justify-content:space-between; background:#111">
+                <b id="m-title"></b>
+                <span onclick="closePlayer()" style="cursor:pointer">Закрыть X</span>
             </div>
             <div class="video-wrapper" id="videoArea"></div>
-        </div>
-        
-        <div class="comment-side">
-            <div class="comm-header">Обсуждение</div>
-            <div class="comm-list" id="commList"></div>
-            <div class="comm-input-area">
-                <input type="text" id="commInput" placeholder="Ваш комментарий..." style="flex:1; margin:0">
-                <button onclick="addComment()" class="btn-mini">Отправить</button>
-            </div>
+            <div style="background:#111; padding:10px; display:flex; gap:8px; overflow-x:auto" id="epBar"></div>
         </div>
     </div>
 </div>
 
 <script>
-    const DEFAULT_AVATAR = "https://encrypted-tbn0.gstatic.com";
-    let isRegMode = false, currentUser = null, activeAnimeIdx = null;
-    let users = JSON.parse(localStorage.getItem('p_users')) || [];
-    let anime = JSON.parse(localStorage.getItem('p_anime')) || [];
+    let isReg = false;
+    let animeDB = JSON.parse(localStorage.getItem('p_anime')) || [];
+    let usersDB = JSON.parse(localStorage.getItem('p_users')) || [];
+    let currentUser = JSON.parse(localStorage.getItem('p_session'));
 
-    function toast(text, err = false) {
-        const c = document.getElementById('notify-container'), d = document.createElement('div');
-        d.className = 'toast'; if(err) d.style.borderLeftColor = 'orange';
-        d.innerText = text; c.appendChild(d); setTimeout(() => d.remove(), 3000);
+    function toast(text) {
+        const box = document.getElementById('notify-box');
+        const el = document.createElement('div');
+        el.className = 'toast'; el.innerText = text;
+        box.appendChild(el); setTimeout(() => el.remove(), 4000);
     }
 
-    function toggleAuthMode() {
-        isRegMode = !isRegMode;
-        document.getElementById('auth-title').innerText = isRegMode ? 'Регистрация' : 'Вход';
-        document.querySelector('#auth-screen button').innerText = isRegMode ? 'СОЗДАТЬ' : 'ВОЙТИ';
-    }
+    function toggleMode() { isReg = !isReg; document.getElementById('auth-title').innerText = isReg ? "Регистрация" : "Вход"; }
 
-    function auth() {
-        const name = document.getElementById('uName').value.trim(), pass = document.getElementById('uPass').value.trim();
-        if(!name || !pass) return toast("Заполни поля!", true);
-        if(name === 'admin' && pass === 'AnimeMaster_2024!') {
-            currentUser = { name: 'admin', av: DEFAULT_AVATAR, role: 'admin' };
-            saveSession(); return start();
-        }
-        if(isRegMode) {
-            if(users.find(u => u.name.toLowerCase() === name.toLowerCase())) return toast("Ник занят!", true);
-            const newUser = { name, pass, av: DEFAULT_AVATAR, role: 'user' };
-            users.push(newUser); localStorage.setItem('p_users', JSON.stringify(users));
-            currentUser = newUser; saveSession(); start();
+    function processAuth() {
+        const name = document.getElementById('logName').value.trim(), pass = document.getElementById('logPass').value.trim();
+        // Админ по умолчанию для тебя
+        if(name === 'admin' && pass === '123') {
+            currentUser = { id: 0, name: 'Admin', pass: '123', role: 'admin', favs: [], subs: {}, watchLater: {} };
         } else {
-            const found = users.find(u => u.name === name && u.pass === pass);
-            if(found) { currentUser = found; saveSession(); start(); } else toast("Ошибка входа!", true);
+            let found = usersDB.find(u => u.name === name);
+            if(isReg) {
+                if(found) return alert("Ник занят!");
+                currentUser = { id: usersDB.length+1, name, pass, role:'user', favs:[], subs:{}, watchLater:{} };
+                usersDB.push(currentUser); localStorage.setItem('p_users', JSON.stringify(usersDB));
+            } else {
+                if(!found || found.pass !== pass) return alert("Ошибка входа!");
+                currentUser = found;
+            }
         }
-    }
-
-    function saveSession() { localStorage.setItem('p_session', JSON.stringify(currentUser)); }
-    function logout() { localStorage.removeItem('p_session'); location.reload(); }
-
-    function start() {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('navUser').style.display = 'flex';
-        document.getElementById('myAv').src = currentUser.av;
-        document.getElementById('userNameShow').innerText = currentUser.name;
-        if(currentUser.role === 'admin') document.getElementById('admBtn').style.display = 'block';
-        render(anime);
-    }
-
-    function addAnime() {
-        const t = document.getElementById('a-title').value.trim(), p = document.getElementById('a-poster').value.trim(), v = document.getElementById('a-vid').value.trim();
-        if(t && v) {
-            anime.push({ t, v, i: p || 'https://via.placeholder.com', rate: 0, votes: 0, comments: [] });
-            localStorage.setItem('p_anime', JSON.stringify(anime));
-            render(anime); showSection('main');
-        }
-    }
-
-    function deleteAnime(index, e) {
-        e.stopPropagation();
-        if(confirm("Удалить?")) {
-            anime.splice(index, 1);
-            localStorage.setItem('p_anime', JSON.stringify(anime));
-            render(anime);
-        }
-    }
-
-    function setRating(index, stars, e) {
-        e.stopPropagation();
-        const item = anime[index];
-        item.rate = ((item.rate * (item.votes || 0)) + stars) / ((item.votes || 0) + 1);
-        item.votes = (item.votes || 0) + 1;
-        localStorage.setItem('p_anime', JSON.stringify(anime));
-        render(anime);
-    }
-
-    function render(data) {
-        const g = document.getElementById('sec-main'); g.style.display = 'grid';
-        const sorted = [...data].sort((a, b) => (b.rate || 0) - (a.rate || 0));
-        g.innerHTML = sorted.map((a) => {
-            const rIdx = anime.indexOf(a);
-            const r = Math.round(a.rate || 0);
-            return `<div class="card" onclick="openPlayer(${rIdx})">
-                ${currentUser?.role === 'admin' ? `<button class="del-btn" onclick="deleteAnime(${rIdx}, event)">🗑</button>` : ''}
-                <img src="${a.i}" onerror="this.src='https://via.placeholder.com?text=No+Poster'">
-                <div class="card-info">
-                    <b>${a.t}</b>
-                    <div class="stars">
-                        ${[1,2,3,4,5].map(s => `<span class="${r >= s ? 'active' : ''}" onclick="setRating(${rIdx}, ${s}, event)">★</span>`).join('')}
-                        <span class="rating-num">${(a.rate || 0).toFixed(1)}</span>
-                    </div>
-                </div>
-            </div>`
-        }).join('');
-    }
-
-    // КОММЕНТАРИИ
-    function openPlayer(idx) {
-        activeAnimeIdx = idx;
-        const a = anime[idx];
-        document.getElementById('m-title').innerText = a.t;
-        document.getElementById('videoArea').innerHTML = `<iframe src="${a.v}" allowfullscreen allow="autoplay"></iframe>`;
-        document.getElementById('playerModal').style.display = 'flex';
-        renderComments();
-    }
-
-    function addComment() {
-        const input = document.getElementById('commInput');
-        const text = input.value.trim();
-        if(!text) return;
-        
-        if(!anime[activeAnimeIdx].comments) anime[activeAnimeIdx].comments = [];
-        anime[activeAnimeIdx].comments.push({ user: currentUser.name, av: currentUser.av, text });
-        localStorage.setItem('p_anime', JSON.stringify(anime));
-        
-        input.value = '';
-        renderComments();
-    }
-
-    function renderComments() {
-        const list = document.getElementById('commList');
-        const comms = anime[activeAnimeIdx].comments || [];
-        list.innerHTML = comms.map(c => `
-            <div class="comm-item">
-                <div class="comm-user"><img src="${c.av}" style="width:20px; height:20px; border-radius:50%"> ${c.user}</div>
-                <div>${c.text}</div>
-            </div>
-        `).join('') || '<div style="color:gray; text-align:center">Будь первым, кто оставит отзыв!</div>';
-        list.scrollTop = list.scrollHeight;
-    }
-
-    function closePlayer() { document.getElementById('playerModal').style.display = 'none'; document.getElementById('videoArea').innerHTML = ''; }
-    function handleSearch() { const q = document.getElementById('searchInput').value.toLowerCase(); render(anime.filter(a => a.t.toLowerCase().includes(q))); }
-    function goHome() { showSection('main'); }
-    function showSection(id) { 
-        document.querySelectorAll('.panel').forEach(p => p.style.display = 'none'); 
-        const s = document.getElementById('sec-' + id);
-        if(id === 'main') s.style.display = 'grid'; else s.style.display = 'block';
-    }
-
-    function changeAvatar() {
-        const url = document.getElementById('newAvUrl').value.trim();
-        if(url) {
-            currentUser.av = url; document.getElementById('myAv').src = url;
-            const uIdx = users.findIndex(u => u.name === currentUser.name);
-            if(uIdx !== -1) { users[uIdx].av = url; localStorage.setItem('p_users', JSON.stringify(users)); }
-            saveSession(); toast("Аватар обновлен!");
-        }
+        localStorage.setItem('p_session', JSON.stringify(currentUser));
+        location.reload();
     }
 
     window.onload = () => {
-        const saved = localStorage.getItem('p_session');
-        if(saved) { currentUser = JSON.parse(saved); start(); } 
-        else { document.getElementById('auth-screen').style.display = 'flex'; render(anime); }
+        if(currentUser) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('mainNav').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'block';
+            updateUI();
+            renderCards('sec-main', animeDB);
+        }
     };
+
+    function updateUI() {
+        document.getElementById('uNameShow').innerText = currentUser.name;
+        document.getElementById('uIdShow').innerText = "ID: " + currentUser.id;
+        document.getElementById('myAv').src = "https://encrypted-tbn0.gstatic.com";
+        if(currentUser.role === 'admin') document.getElementById('admBtn').style.display = 'block';
+    }
+
+    // РЕДАКТИРОВАНИЕ ПРОФИЛЯ
+    function updateName() {
+        const newName = document.getElementById('editName').value.trim();
+        if(!newName) return;
+        if(usersDB.find(u => u.name === newName)) return toast("Имя уже занято!");
+
+        // Обновляем в базе
+        const idx = usersDB.findIndex(u => u.id === currentUser.id);
+        currentUser.name = newName;
+        if(idx !== -1) usersDB[idx].name = newName;
+        
+        saveAll();
+        toast("Имя изменено!");
+        updateUI();
+    }
+
+    function updatePass() {
+        const oldP = document.getElementById('oldPass').value;
+        const newP = document.getElementById('newPass').value;
+        
+        if(oldP !== currentUser.pass) return toast("Старый пароль неверен!");
+        if(newP.length < 3) return toast("Пароль слишком короткий!");
+
+        currentUser.pass = newP;
+        const idx = usersDB.findIndex(u => u.id === currentUser.id);
+        if(idx !== -1) usersDB[idx].pass = newP;
+
+        saveAll();
+        toast("Пароль успешно обновлен!");
+        document.getElementById('oldPass').value = '';
+        document.getElementById('newPass').value = '';
+    }
+
+    function saveAll() {
+        localStorage.setItem('p_users', JSON.stringify(usersDB));
+        localStorage.setItem('p_session', JSON.stringify(currentUser));
+    }
+
+    // ОСТАЛЬНОЕ
+    function renderCards(id, data) {
+        const g = document.getElementById(id); g.innerHTML = '';
+        data.forEach((a, i) => {
+            g.innerHTML += `<div class="card" onclick="openPlayer(${animeDB.indexOf(a)})">
+                <img src="${a.i || 'https://via.placeholder.com'}">
+                <div style="padding:10px; text-align:center"><b>${a.t}</b></div>
+            </div>`;
+        });
+    }
+
+    function openPlayer(idx) {
+        const a = animeDB[idx];
+        document.getElementById('playerModal').style.display = 'flex';
+        document.getElementById('m-title').innerText = a.t;
+        const bar = document.getElementById('epBar'); bar.innerHTML = '';
+        a.vids.forEach((link, i) => {
+            bar.innerHTML += `<button class="btn-mini" onclick="setVid('${link}')">Серия ${i+1}</button>`;
+        });
+        setVid(a.vids);
+    }
+
+    function setVid(url) { document.getElementById('videoArea').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay"></iframe>`; }
+    function closePlayer() { document.getElementById('playerModal').style.display = 'none'; document.getElementById('videoArea').innerHTML = ''; }
+    
+    function showSection(id) {
+        document.querySelectorAll('.container > div').forEach(d => d.style.display = 'none');
+        const s = document.getElementById('sec-' + id);
+        s.style.display = (id === 'main' || id === 'favs') ? 'grid' : 'block';
+        if(id === 'favs') renderCards('sec-favs', animeDB.filter(a => currentUser.favs.includes(a.t)));
+    }
+
+    function addAnime() {
+        const t = document.getElementById('a-title').value, i = document.getElementById('a-poster').value, v = document.getElementById('a-vids').value;
+        const vids = v.split(',').map(s => s.trim());
+        animeDB.push({ t, i, vids });
+        localStorage.setItem('p_anime', JSON.stringify(animeDB));
+        location.reload();
+    }
+
+    function logout() { localStorage.removeItem('p_session'); location.reload(); }
 </script>
 </body>
 </html>
-
-
-</html>
-
-
-
