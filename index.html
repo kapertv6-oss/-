@@ -2,65 +2,38 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimeHub | Cloud Fix</title>
-    <!-- Подключаем Firebase SDK через CDN -->
+    <!-- 1. ПОДКЛЮЧАЕМ FIREBASE ПЕРВЫМ ДЕЛОМ -->
     <script src="https://www.gstatic.com"></script>
     <script src="https://www.gstatic.com"></script>
+    
     <style>
-        :root { --bg: #0a0a0c; --card: #15151a; --accent: #ff4757; --text: #fff; --panel: #111; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        
-        #notify-box { position: fixed; top: 20px; right: 20px; z-index: 10000; }
-        .toast { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(255,71,87,0.4); }
-
-        /* Центрирование входа */
-        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .auth-box { background: var(--card); padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; margin-top: 15px; border-radius: 10px; border: none; background: var(--accent); color: #fff; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { opacity: 0.8; transform: scale(1.02); }
-        .toggle-btn { color: #5c7cff; cursor: pointer; margin-top: 20px; font-size: 14px; display: inline-block; text-decoration: underline; }
-
-        nav { display: none; justify-content: space-between; padding: 15px 5%; background: var(--panel); border-bottom: 1px solid #222; align-items: center; }
-        .container { padding: 20px 5%; display: none; flex: 1; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        :root { --bg: #0a0a0c; --card: #15151a; --accent: #ff4757; --text: #fff; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .auth-box { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center; width: 320px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        nav, .container { display: none; } /* Скрыто до входа */
     </style>
 </head>
 <body>
 
-<div id="notify-box"></div>
-
-<!-- Экран Входа -->
 <div id="auth-screen">
     <div class="auth-box">
         <h2 id="auth-title">Вход</h2>
-        <input type="text" id="logName" placeholder="Логин" autocomplete="username">
-        <input type="password" id="logPass" placeholder="Пароль" autocomplete="current-password">
-        <!-- Важно: id="authBtn" для скрипта -->
-        <button id="authBtn" onclick="processAuth()">ВОЙТИ</button>
-        <div class="toggle-btn" onclick="toggleMode()" id="toggleText">Регистрация</div>
+        <input type="text" id="logName" placeholder="Логин">
+        <input type="password" id="logPass" placeholder="Пароль">
+        <button id="mainBtn" onclick="processAuth()">ВОЙТИ</button>
+        <p id="toggleText" onclick="toggleMode()" style="color:gray; cursor:pointer; font-size:12px; margin-top:15px">Регистрация</p>
     </div>
-</div>
-
-<nav id="mainNav">
-    <h2 style="margin:0">ANIME<span style="color:var(--accent)">HUB</span></h2>
-    <button onclick="logout()" style="width:auto; padding: 8px 15px; margin:0; background:#333">Выйти</button>
-</nav>
-
-<div class="container" id="mainContent">
-    <div id="sec-admin" style="display:none; background:#111; padding:20px; border-radius:15px; margin-bottom:20px; border:1px solid #333">
-        <h3>Добавить аниме</h3>
-        <input type="text" id="a-title" placeholder="Название">
-        <input type="text" id="a-vids" placeholder="Ссылка на видео">
-        <button onclick="addAnime()">Опубликовать</button>
-    </div>
-    <div id="sec-main" class="grid"></div>
 </div>
 
 <script>
-    // ТВОЙ КОНФИГ (ОСТАВЛЯЕМ БЕЗ ИЗМЕНЕНИЙ)
+    // 2. ОБЪЯВЛЯЕМ ПЕРЕМЕННЫЕ В САМОМ НАЧАЛЕ
+    let isReg = false;
+    let currentUser = JSON.parse(localStorage.getItem('p_session'));
+
+    // 3. КОНФИГ
     const firebaseConfig = {
       apiKey: "AIzaSyDgbNKx7k6TMk8PhUbKAW_6wYJm-aakA6c",
       authDomain: "anumehub-f0cd9.firebaseapp.com",
@@ -71,90 +44,37 @@
       databaseURL: "https://anumehub-f0cd9-default-rtdb.europe-west1.firebasedatabase.app"
     };
 
-    // Инициализация с проверкой ошибок
-    try {
+    // Проверка загрузки Firebase
+    if (typeof firebase !== 'undefined') {
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        console.log("Firebase подключен!");
-    } catch(e) {
-        alert("Ошибка Firebase: " + e.message);
-    }
-
-    let isRegMode = false;
-    let currentUser = JSON.parse(localStorage.getItem('p_session'));
-
-    function toast(msg) {
-        const t = document.createElement('div'); t.className = 'toast'; t.innerText = msg;
-        document.getElementById('notify-box').appendChild(t); setTimeout(() => t.remove(), 3000);
+    } else {
+        alert("Ошибка: Firebase не загружен. Проверь интернет!");
     }
 
     function toggleMode() {
-        isRegMode = !isRegMode;
-        document.getElementById('auth-title').innerText = isRegMode ? "Регистрация" : "Вход";
-        document.getElementById('authBtn').innerText = isRegMode ? "СОЗДАТЬ АККАУНТ" : "ВОЙТИ";
-        document.getElementById('toggleText').innerText = isRegMode ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Регистрация";
+        isReg = !isReg;
+        document.getElementById('auth-title').innerText = isReg ? "Регистрация" : "Вход";
+        document.getElementById('mainBtn').innerText = isReg ? "СОЗДАТЬ" : "ВОЙТИ";
     }
 
     function processAuth() {
         const name = document.getElementById('logName').value.trim();
         const pass = document.getElementById('logPass').value.trim();
 
-        if(!name || !pass) {
-            toast("Заполните все поля!");
-            return;
-        }
+        if(!name || !pass) return alert("Заполни поля!");
 
-        // Логика для админа и юзеров
-        if(name === 'admin' && pass === '123') {
-            currentUser = { name: "Администратор", role: "admin" };
-        } else {
-            currentUser = { name: name, role: "user" };
-        }
-
+        currentUser = { name: name, role: (name === 'admin' ? 'admin' : 'user') };
         localStorage.setItem('p_session', JSON.stringify(currentUser));
-        renderApp();
-        toast("Привет, " + name + "!");
-    }
-
-    function renderApp() {
-        if(!currentUser) return;
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('mainNav').style.display = 'flex';
-        document.getElementById('mainContent').style.display = 'block';
-        if(currentUser.role === 'admin') document.getElementById('sec-admin').style.display = 'block';
         
-        // Загрузка данных из облака
-        db.ref('anime').on('value', (snap) => {
-            const list = document.getElementById('sec-main');
-            list.innerHTML = '';
-            const data = snap.val();
-            for(let id in data) {
-                list.innerHTML += `<div style="background:#15151a; padding:15px; border-radius:15px; border:1px solid #333; text-align:center">
-                    <b>${data[id].t}</b>
-                </div>`;
-            }
-        });
-    }
-
-    function addAnime() {
-        const t = document.getElementById('a-title').value;
-        const v = document.getElementById('a-vids').value;
-        if(t && v) {
-            db.ref('anime').push({ t, v });
-            toast("Добавлено в облако!");
-        }
-    }
-
-    function logout() {
-        localStorage.removeItem('p_session');
+        alert("Успешный вход! Теперь обнови страницу.");
         location.reload();
     }
 
-    // Проверка при загрузке страницы
-    window.onload = () => {
-        if(currentUser) renderApp();
-    };
+    // Если уже залогинен — скрываем вход
+    if(currentUser) {
+        document.getElementById('auth-screen').innerHTML = "<h1>Привет, " + currentUser.name + "! Ты в системе.</h1><button onclick='localStorage.clear(); location.reload();'>Выйти</button>";
+    }
 </script>
-
 </body>
 </html>
