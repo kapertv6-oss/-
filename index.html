@@ -2,7 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>AnimeHub | Profile Editor</title>
+    <title>AnimeHub | Global Cloud & Chat</title>
+    <!-- Подключаем Firebase SDK -->
+    <script src="https://www.gstatic.com"></script>
+    <script src="https://www.gstatic.com"></script>
     <style>
         :root { --bg: #0a0a0c; --card: #15151a; --accent: #ff4757; --text: #fff; --panel: #111; --gold: #ffd700; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
@@ -13,45 +16,57 @@
 
         nav { display: none; justify-content: space-between; padding: 10px 5%; background: var(--panel); border-bottom: 1px solid #222; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .nav-links { display: flex; gap: 15px; }
-        .nav-links span { cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .nav-links span { cursor: pointer; font-size: 14px; transition: 0.2s; font-weight: 500; }
         .nav-links span:hover { color: var(--accent); }
 
         .container { padding: 20px 5%; display: none; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; transition: 0.3s; position: relative; }
-        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
-        .card img { width: 100%; height: 280px; object-fit: cover; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
         
-        /* Панели */
+        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; transition: 0.3s; position: relative; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .card img { width: 100%; height: 300px; object-fit: cover; cursor: pointer; }
+        
         .panel-box { background: #111; padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
-        input, button, textarea { padding: 10px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        input, button, textarea { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; margin: 5px 0; width: 100%; box-sizing: border-box; }
         button { background: var(--accent); border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { opacity: 0.8; }
-        .btn-mini { width: auto; padding: 5px 15px; background: #222; font-size: 12px; }
+        .btn-mini { width: auto; padding: 6px 12px; background: #222; font-size: 11px; border: 1px solid #444; border-radius: 5px; }
 
-        /* Модалка */
+        /* Модалка Плеера и Чата */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; justify-content: center; align-items: center; }
-        .modal-layout { display: flex; width: 95%; max-width: 1300px; height: 85vh; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
-        .video-side { flex: 3; display: flex; flex-direction: column; }
-        .video-wrapper { flex: 1; position: relative; }
+        .modal-layout { display: flex; width: 95%; max-width: 1400px; height: 90vh; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
+        
+        .video-side { flex: 3; display: flex; flex-direction: column; background: #000; }
+        .video-wrapper { flex: 1; position: relative; background: #000; }
         .video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        
+        /* Боковая панель Чата */
+        .chat-side { flex: 1.2; background: #0a0a0c; border-left: 1px solid #222; display: flex; flex-direction: column; }
+        .chat-header { padding: 15px; background: #111; border-bottom: 1px solid #222; font-weight: bold; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-msg { background: #15151a; padding: 10px; border-radius: 8px; border: 1px solid #222; font-size: 13px; }
+        .chat-msg b { color: var(--accent); font-size: 11px; display: block; margin-bottom: 3px; }
+        .chat-input-area { padding: 10px; background: #111; border-top: 1px solid #222; display: flex; gap: 5px; }
+
+        .ep-bar { background: #111; padding: 10px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #222; }
     </style>
 </head>
 <body>
 
 <div id="notify-box"></div>
 
-<!-- Вход -->
-<div id="auth-screen">
+<!-- Авторизация -->
+<div id="auth-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
     <div style="background:var(--card); padding:30px; border-radius:15px; border:1px solid #333; text-align:center; width:320px;">
         <h2 id="auth-title">Вход</h2>
         <input type="text" id="logName" placeholder="Логин">
         <input type="password" id="logPass" placeholder="Пароль">
         <button onclick="processAuth()">ВОЙТИ</button>
-        <p onclick="toggleMode()" style="font-size:12px; color:gray; cursor:pointer; margin-top:15px">Регистрация</p>
+        <p onclick="toggleMode()" id="toggleText" style="font-size:12px; color:gray; cursor:pointer; margin-top:15px">Регистрация</p>
     </div>
 </div>
 
+<!-- Навигация -->
 <nav id="mainNav">
     <h2 onclick="showSection('main')" style="cursor:pointer; margin:0">ANIME<span style="color:var(--accent)">HUB</span></h2>
     <div class="nav-links">
@@ -61,185 +76,197 @@
     </div>
     <div class="user-info" style="display:flex; align-items:center; gap:10px">
         <div style="text-align:right; font-size:12px"><b id="uNameShow"></b><br><span id="uIdShow" style="color:var(--accent)"></span></div>
-        <img id="myAv" onclick="showSection('profile')" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); cursor:pointer">
+        <img id="myAv" onclick="showSection('profile')" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); cursor:pointer; object-fit:cover;">
         <button class="btn-mini" onclick="logout()">Выход</button>
     </div>
 </nav>
 
 <div class="container" id="mainContent">
-    <!-- Редактор Профиля -->
-    <div id="sec-profile" class="panel-box" style="display:none">
-        <h2>Настройки профиля</h2>
-        <div style="max-width:400px">
-            <label>Новое имя:</label>
-            <input type="text" id="editName" placeholder="Введите ник">
-            <button onclick="updateName()">Сменить имя</button>
-            <hr style="border:1px solid #222; margin:20px 0">
-            <label>Смена пароля:</label>
-            <input type="password" id="oldPass" placeholder="Старый пароль">
-            <input type="password" id="newPass" placeholder="Новый пароль">
-            <button onclick="updatePass()">Обновить пароль</button>
-        </div>
-    </div>
-
-    <!-- Админка -->
-    <div id="sec-admin" class="panel-box" style="display:none">
-        <h3>Добавить аниме</h3>
-        <input type="text" id="a-title" placeholder="Название">
-        <input type="text" id="a-poster" placeholder="Постер (URL)">
-        <textarea id="a-vids" placeholder="Ссылки на серии через запятую"></textarea>
-        <button onclick="addAnime()">ВЫЛОЖИТЬ</button>
-    </div>
-
     <div id="sec-main" class="grid"></div>
     <div id="sec-favs" class="grid" style="display:none"></div>
+    
+    <div id="sec-profile" class="panel-box" style="display:none">
+        <h2>Настройки профиля</h2>
+        <input type="text" id="editName" placeholder="Сменить ник" style="max-width:300px">
+        <button onclick="updateName()" style="max-width:300px">Обновить</button>
+    </div>
+
+    <div id="sec-admin" class="panel-box" style="display:none">
+        <h3>Добавить в Облако</h3>
+        <input type="text" id="a-title" placeholder="Название">
+        <input type="text" id="a-poster" placeholder="Постер (URL)">
+        <textarea id="a-vids" placeholder="Ссылки на серии (через запятую)"></textarea>
+        <button onclick="addAnimeCloud()">ОПУБЛИКОВАТЬ</button>
+    </div>
 </div>
 
-<!-- Модалка Плеера -->
+<!-- Плеер + Чат -->
 <div id="playerModal" class="modal">
     <div class="modal-layout">
         <div class="video-side">
-            <div style="padding:15px; display:flex; justify-content:space-between; background:#111">
+            <div style="padding:15px; display:flex; justify-content:space-between; background:#111; border-bottom: 1px solid #222;">
                 <b id="m-title"></b>
-                <span onclick="closePlayer()" style="cursor:pointer">Закрыть X</span>
+                <span onclick="closePlayer()" style="cursor:pointer; color:var(--accent); font-weight:bold">ЗАКРЫТЬ ✕</span>
             </div>
             <div class="video-wrapper" id="videoArea"></div>
-            <div style="background:#111; padding:10px; display:flex; gap:8px; overflow-x:auto" id="epBar"></div>
+            <div class="ep-bar" id="epBar"></div>
+        </div>
+        <div class="chat-side">
+            <div class="chat-header">Чат обсуждения</div>
+            <div id="chatList" class="chat-list"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Написать..." style="margin:0">
+                <button onclick="sendMsg()" style="width:50px">></button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    let isReg = false;
-    let animeDB = JSON.parse(localStorage.getItem('p_anime')) || [];
-    let usersDB = JSON.parse(localStorage.getItem('p_users')) || [];
+    // ТВОЙ КОНФИГ
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgbNKx7k6TMk8PhUbKAW_6wYJm-aakA6c",
+      authDomain: "anumehub-f0cd9.firebaseapp.com",
+      projectId: "anumehub-f0cd9",
+      storageBucket: "anumehub-f0cd9.firebasestorage.app",
+      messagingSenderId: "789478887929",
+      appId: "1:789478887929:web:8ec5e4331f456a4d07ed28",
+      databaseURL: "https://anumehub-f0cd9-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let isReg = false, animeDB = [], activeAnimeId = null;
     let currentUser = JSON.parse(localStorage.getItem('p_session'));
 
     function toast(text) {
-        const box = document.getElementById('notify-box');
-        const el = document.createElement('div');
-        el.className = 'toast'; el.innerText = text;
-        box.appendChild(el); setTimeout(() => el.remove(), 4000);
+        const el = document.createElement('div'); el.className = 'toast'; el.innerText = text;
+        document.getElementById('notify-box').appendChild(el); setTimeout(() => el.remove(), 3000);
     }
 
     function toggleMode() { isReg = !isReg; document.getElementById('auth-title').innerText = isReg ? "Регистрация" : "Вход"; }
 
     function processAuth() {
         const name = document.getElementById('logName').value.trim(), pass = document.getElementById('logPass').value.trim();
-        // Админ по умолчанию для тебя
-        if(name === 'admin' && pass === '123') {
-            currentUser = { id: 0, name: 'Admin', pass: '123', role: 'admin', favs: [], subs: {}, watchLater: {} };
-        } else {
-            let found = usersDB.find(u => u.name === name);
-            if(isReg) {
-                if(found) return alert("Ник занят!");
-                currentUser = { id: usersDB.length+1, name, pass, role:'user', favs:[], subs:{}, watchLater:{} };
-                usersDB.push(currentUser); localStorage.setItem('p_users', JSON.stringify(usersDB));
-            } else {
-                if(!found || found.pass !== pass) return alert("Ошибка входа!");
-                currentUser = found;
-            }
-        }
+        if(!name) return toast("Введите имя!");
+        currentUser = (name === 'admin' && pass === '123') ? {name:'Admin', role:'admin', favs:[]} : {name, role:'user', favs:[]};
         localStorage.setItem('p_session', JSON.stringify(currentUser));
         location.reload();
     }
 
+    // ПОЛУЧЕНИЕ АНИМЕ ИЗ ОБЛАКА
+    db.ref('anime').on('value', (snap) => {
+        animeDB = [];
+        const data = snap.val();
+        for(let id in data) animeDB.push({...data[id], fbId: id});
+        if(currentUser) renderCards('sec-main', animeDB);
+    });
+
     window.onload = () => {
         if(currentUser) {
             document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('mainNav').style.display = 'flex';
+            document.querySelectorAll('nav, .container').forEach(el => el.style.display = 'flex');
             document.getElementById('mainContent').style.display = 'block';
-            updateUI();
-            renderCards('sec-main', animeDB);
+            updateUI(); showSection('main');
         }
     };
 
     function updateUI() {
         document.getElementById('uNameShow').innerText = currentUser.name;
-        document.getElementById('uIdShow').innerText = "ID: " + currentUser.id;
-        document.getElementById('myAv').src = "https://encrypted-tbn0.gstatic.com";
+        document.getElementById('uIdShow').innerText = currentUser.role === 'admin' ? "Разработчик" : "Пользователь";
+        document.getElementById('myAv').src = `https://ui-avatars.com{currentUser.name}&background=ff4757&color=fff`;
         if(currentUser.role === 'admin') document.getElementById('admBtn').style.display = 'block';
     }
 
-    // РЕДАКТИРОВАНИЕ ПРОФИЛЯ
-    function updateName() {
-        const newName = document.getElementById('editName').value.trim();
-        if(!newName) return;
-        if(usersDB.find(u => u.name === newName)) return toast("Имя уже занято!");
-
-        // Обновляем в базе
-        const idx = usersDB.findIndex(u => u.id === currentUser.id);
-        currentUser.name = newName;
-        if(idx !== -1) usersDB[idx].name = newName;
-        
-        saveAll();
-        toast("Имя изменено!");
-        updateUI();
-    }
-
-    function updatePass() {
-        const oldP = document.getElementById('oldPass').value;
-        const newP = document.getElementById('newPass').value;
-        
-        if(oldP !== currentUser.pass) return toast("Старый пароль неверен!");
-        if(newP.length < 3) return toast("Пароль слишком короткий!");
-
-        currentUser.pass = newP;
-        const idx = usersDB.findIndex(u => u.id === currentUser.id);
-        if(idx !== -1) usersDB[idx].pass = newP;
-
-        saveAll();
-        toast("Пароль успешно обновлен!");
-        document.getElementById('oldPass').value = '';
-        document.getElementById('newPass').value = '';
-    }
-
-    function saveAll() {
-        localStorage.setItem('p_users', JSON.stringify(usersDB));
-        localStorage.setItem('p_session', JSON.stringify(currentUser));
-    }
-
-    // ОСТАЛЬНОЕ
     function renderCards(id, data) {
         const g = document.getElementById(id); g.innerHTML = '';
         data.forEach((a, i) => {
-            g.innerHTML += `<div class="card" onclick="openPlayer(${animeDB.indexOf(a)})">
-                <img src="${a.i || 'https://via.placeholder.com'}">
-                <div style="padding:10px; text-align:center"><b>${a.t}</b></div>
+            const isFav = currentUser.favs && currentUser.favs.includes(a.t);
+            g.innerHTML += `<div class="card">
+                <img src="${a.i}" onclick="openPlayer('${a.fbId}')">
+                <div style="padding:12px; text-align:center">
+                    <div style="font-size:14px; margin-bottom:8px; height:34px; overflow:hidden"><b>${a.t}</b></div>
+                    <button class="btn-mini" style="background:${isFav ? 'var(--accent)' : '#222'}; width:100%" onclick="toggleFav('${a.t}')">
+                        ${isFav ? '❤ В ИЗБРАННОМ' : '♡ В ИЗБРАННОЕ'}
+                    </button>
+                </div>
             </div>`;
         });
     }
 
-    function openPlayer(idx) {
-        const a = animeDB[idx];
+    function addAnimeCloud() {
+        const t = document.getElementById('a-title').value, i = document.getElementById('a-poster').value, v = document.getElementById('a-vids').value;
+        if(!t || !v) return toast("Заполните поля!");
+        db.ref('anime').push({ t, i, vids: v.split(',').map(s => s.trim()) });
+        toast("Опубликовано!");
+        document.querySelectorAll('#sec-admin input, #sec-admin textarea').forEach(e => e.value = '');
+    }
+
+    function openPlayer(fbId) {
+        activeAnimeId = fbId;
+        const a = animeDB.find(x => x.fbId === fbId);
         document.getElementById('playerModal').style.display = 'flex';
         document.getElementById('m-title').innerText = a.t;
+        
         const bar = document.getElementById('epBar'); bar.innerHTML = '';
         a.vids.forEach((link, i) => {
             bar.innerHTML += `<button class="btn-mini" onclick="setVid('${link}')">Серия ${i+1}</button>`;
         });
-        setVid(a.vids);
+        setVid(a.vids[0]);
+
+        // ЗАГРУЗКА ЧАТА ДЛЯ ЭТОГО АНИМЕ
+        loadChat(fbId);
     }
 
-    function setVid(url) { document.getElementById('videoArea').innerHTML = `<iframe src="${url}" allowfullscreen allow="autoplay"></iframe>`; }
-    function closePlayer() { document.getElementById('playerModal').style.display = 'none'; document.getElementById('videoArea').innerHTML = ''; }
-    
+    function loadChat(fbId) {
+        db.ref('chats/' + fbId).on('value', (snap) => {
+            const list = document.getElementById('chatList'); list.innerHTML = '';
+            const data = snap.val();
+            for(let id in data) {
+                list.innerHTML += `<div class="chat-msg"><b>${data[id].user}</b>${data[id].text}</div>`;
+            }
+            list.scrollTop = list.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+        const inp = document.getElementById('chatInput');
+        if(!inp.value.trim() || !activeAnimeId) return;
+        db.ref('chats/' + activeAnimeId).push({ user: currentUser.name, text: inp.value });
+        inp.value = '';
+    }
+
+    function setVid(url) { document.getElementById('videoArea').innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`; }
+    function closePlayer() { 
+        document.getElementById('playerModal').style.display = 'none'; 
+        document.getElementById('videoArea').innerHTML = '';
+        if(activeAnimeId) db.ref('chats/' + activeAnimeId).off();
+    }
+
     function showSection(id) {
         document.querySelectorAll('.container > div').forEach(d => d.style.display = 'none');
         const s = document.getElementById('sec-' + id);
         s.style.display = (id === 'main' || id === 'favs') ? 'grid' : 'block';
-        if(id === 'favs') renderCards('sec-favs', animeDB.filter(a => currentUser.favs.includes(a.t)));
+        if(id === 'favs') renderCards('sec-favs', animeDB.filter(a => currentUser.favs && currentUser.favs.includes(a.t)));
+        if(id === 'main') renderCards('sec-main', animeDB);
     }
 
-    function addAnime() {
-        const t = document.getElementById('a-title').value, i = document.getElementById('a-poster').value, v = document.getElementById('a-vids').value;
-        const vids = v.split(',').map(s => s.trim());
-        animeDB.push({ t, i, vids });
-        localStorage.setItem('p_anime', JSON.stringify(animeDB));
-        location.reload();
+    function toggleFav(title) {
+        if(!currentUser.favs) currentUser.favs = [];
+        const idx = currentUser.favs.indexOf(title);
+        idx === -1 ? currentUser.favs.push(title) : currentUser.favs.splice(idx, 1);
+        localStorage.setItem('p_session', JSON.stringify(currentUser));
+        showSection('main');
     }
 
     function logout() { localStorage.removeItem('p_session'); location.reload(); }
+    function updateName() {
+        const n = document.getElementById('editName').value.trim();
+        if(!n) return; currentUser.name = n;
+        localStorage.setItem('p_session', JSON.stringify(currentUser));
+        location.reload();
+    }
 </script>
 </body>
 </html>
