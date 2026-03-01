@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimeHub | Global Cloud & Chat</title>
     <!-- Подключаем Firebase SDK -->
     <script src="https://www.gstatic.com"></script>
@@ -14,6 +15,7 @@
         .toast { background: var(--accent); color: #fff; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(255,71,87,0.4); animation: slide 0.3s ease forwards; pointer-events: auto; }
         @keyframes slide { from { transform: translateX(120%); } to { transform: translateX(0); } }
 
+        /* Навигация */
         nav { display: none; justify-content: space-between; padding: 10px 5%; background: var(--panel); border-bottom: 1px solid #222; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .nav-links { display: flex; gap: 15px; }
         .nav-links span { cursor: pointer; font-size: 14px; transition: 0.2s; font-weight: 500; }
@@ -22,17 +24,23 @@
         .container { padding: 20px 5%; display: none; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
         
+        /* Карточки */
         .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; transition: 0.3s; position: relative; }
         .card:hover { border-color: var(--accent); transform: translateY(-5px); }
         .card img { width: 100%; height: 300px; object-fit: cover; cursor: pointer; }
         
+        /* Кнопки и формы */
         .panel-box { background: #111; padding: 25px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
         input, button, textarea { padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; margin: 5px 0; width: 100%; box-sizing: border-box; }
         button { background: var(--accent); border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { opacity: 0.8; }
         .btn-mini { width: auto; padding: 6px 12px; background: #222; font-size: 11px; border: 1px solid #444; border-radius: 5px; }
 
-        /* Модалка Плеера и Чата */
+        /* Авторизация */
+        #auth-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .auth-box { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid #333; text-align: center; width: 320px; }
+
+        /* Плеер и Чат */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; justify-content: center; align-items: center; }
         .modal-layout { display: flex; width: 95%; max-width: 1400px; height: 90vh; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid #333; }
         
@@ -40,13 +48,15 @@
         .video-wrapper { flex: 1; position: relative; background: #000; }
         .video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
         
-        /* Боковая панель Чата */
         .chat-side { flex: 1.2; background: #0a0a0c; border-left: 1px solid #222; display: flex; flex-direction: column; }
         .chat-header { padding: 15px; background: #111; border-bottom: 1px solid #222; font-weight: bold; }
         .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .chat-msg { background: #15151a; padding: 10px; border-radius: 8px; border: 1px solid #222; font-size: 13px; }
+        .chat-msg { background: #15151a; padding: 10px; border-radius: 8px; border: 1px solid #222; font-size: 13px; word-break: break-word; }
         .chat-msg b { color: var(--accent); font-size: 11px; display: block; margin-bottom: 3px; }
+        
         .chat-input-area { padding: 10px; background: #111; border-top: 1px solid #222; display: flex; gap: 5px; }
+        .chat-input-area input { margin: 0; flex: 1; }
+        .chat-input-area button { width: 50px; margin: 0; }
 
         .ep-bar { background: #111; padding: 10px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #222; }
     </style>
@@ -55,9 +65,9 @@
 
 <div id="notify-box"></div>
 
-<!-- Авторизация -->
-<div id="auth-screen" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-    <div style="background:var(--card); padding:30px; border-radius:15px; border:1px solid #333; text-align:center; width:320px;">
+<!-- Экран Авторизации -->
+<div id="auth-screen">
+    <div class="auth-box">
         <h2 id="auth-title">Вход</h2>
         <input type="text" id="logName" placeholder="Логин">
         <input type="password" id="logPass" placeholder="Пароль">
@@ -66,7 +76,7 @@
     </div>
 </div>
 
-<!-- Навигация -->
+<!-- Шапка -->
 <nav id="mainNav">
     <h2 onclick="showSection('main')" style="cursor:pointer; margin:0">ANIME<span style="color:var(--accent)">HUB</span></h2>
     <div class="nav-links">
@@ -77,22 +87,25 @@
     <div class="user-info" style="display:flex; align-items:center; gap:10px">
         <div style="text-align:right; font-size:12px"><b id="uNameShow"></b><br><span id="uIdShow" style="color:var(--accent)"></span></div>
         <img id="myAv" onclick="showSection('profile')" style="width:40px; height:40px; border-radius:50%; border:2px solid var(--accent); cursor:pointer; object-fit:cover;">
-        <button class="btn-mini" onclick="logout()">Выход</button>
+        <button class="btn-mini" onclick="logout()" style="background:#222">Выход</button>
     </div>
 </nav>
 
 <div class="container" id="mainContent">
+    <!-- Сетки -->
     <div id="sec-main" class="grid"></div>
     <div id="sec-favs" class="grid" style="display:none"></div>
     
+    <!-- Профиль -->
     <div id="sec-profile" class="panel-box" style="display:none">
         <h2>Настройки профиля</h2>
-        <input type="text" id="editName" placeholder="Сменить ник" style="max-width:300px">
+        <input type="text" id="editName" placeholder="Новый ник" style="max-width:300px">
         <button onclick="updateName()" style="max-width:300px">Обновить</button>
     </div>
 
+    <!-- Админка -->
     <div id="sec-admin" class="panel-box" style="display:none">
-        <h3>Добавить в Облако</h3>
+        <h3>Добавить аниме в Облако</h3>
         <input type="text" id="a-title" placeholder="Название">
         <input type="text" id="a-poster" placeholder="Постер (URL)">
         <textarea id="a-vids" placeholder="Ссылки на серии (через запятую)"></textarea>
@@ -100,13 +113,13 @@
     </div>
 </div>
 
-<!-- Плеер + Чат -->
+<!-- Модалка -->
 <div id="playerModal" class="modal">
     <div class="modal-layout">
         <div class="video-side">
             <div style="padding:15px; display:flex; justify-content:space-between; background:#111; border-bottom: 1px solid #222;">
                 <b id="m-title"></b>
-                <span onclick="closePlayer()" style="cursor:pointer; color:var(--accent); font-weight:bold">ЗАКРЫТЬ ✕</span>
+                <span onclick="closePlayer()" style="cursor:pointer; color:var(--accent); font-weight:bold">✕</span>
             </div>
             <div class="video-wrapper" id="videoArea"></div>
             <div class="ep-bar" id="epBar"></div>
@@ -115,15 +128,15 @@
             <div class="chat-header">Чат обсуждения</div>
             <div id="chatList" class="chat-list"></div>
             <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Написать..." style="margin:0">
-                <button onclick="sendMsg()" style="width:50px">></button>
+                <input type="text" id="chatInput" placeholder="Сообщение...">
+                <button onclick="sendMsg()">></button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ТВОЙ КОНФИГ
+    // КОНФИГУРАЦИЯ FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyDgbNKx7k6TMk8PhUbKAW_6wYJm-aakA6c",
       authDomain: "anumehub-f0cd9.firebaseapp.com",
@@ -145,17 +158,33 @@
         document.getElementById('notify-box').appendChild(el); setTimeout(() => el.remove(), 3000);
     }
 
-    function toggleMode() { isReg = !isReg; document.getElementById('auth-title').innerText = isReg ? "Регистрация" : "Вход"; }
-
-    function processAuth() {
-        const name = document.getElementById('logName').value.trim(), pass = document.getElementById('logPass').value.trim();
-        if(!name) return toast("Введите имя!");
-        currentUser = (name === 'admin' && pass === '123') ? {name:'Admin', role:'admin', favs:[]} : {name, role:'user', favs:[]};
-        localStorage.setItem('p_session', JSON.stringify(currentUser));
-        location.reload();
+    // ЛОГИКА ВХОДА (ИСПРАВЛЕНА)
+    function toggleMode() { 
+        isReg = !isReg; 
+        document.getElementById('auth-title').innerText = isReg ? "Регистрация" : "Вход";
+        document.getElementById('toggleText').innerText = isReg ? "Уже есть аккаунт? Вход" : "Нет аккаунта? Регистрация";
     }
 
-    // ПОЛУЧЕНИЕ АНИМЕ ИЗ ОБЛАКА
+    function processAuth() {
+        const name = document.getElementById('logName').value.trim();
+        const pass = document.getElementById('logPass').value.trim();
+        if(!name) return toast("Введите имя!");
+
+        currentUser = (name === 'admin' && pass === '123') ? {name:'Admin', role:'admin', favs:[]} : {name, role:'user', favs:[]};
+        localStorage.setItem('p_session', JSON.stringify(currentUser));
+        
+        startApp();
+    }
+
+    function startApp() {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('mainNav').style.display = 'flex';
+        document.getElementById('mainContent').style.display = 'block';
+        updateUI();
+        showSection('main');
+    }
+
+    // ОБЛАКО: ПОЛУЧЕНИЕ ДАННЫХ
     db.ref('anime').on('value', (snap) => {
         animeDB = [];
         const data = snap.val();
@@ -164,12 +193,7 @@
     });
 
     window.onload = () => {
-        if(currentUser) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.querySelectorAll('nav, .container').forEach(el => el.style.display = 'flex');
-            document.getElementById('mainContent').style.display = 'block';
-            updateUI(); showSection('main');
-        }
+        if(currentUser) startApp();
     };
 
     function updateUI() {
@@ -181,7 +205,7 @@
 
     function renderCards(id, data) {
         const g = document.getElementById(id); g.innerHTML = '';
-        data.forEach((a, i) => {
+        data.forEach((a) => {
             const isFav = currentUser.favs && currentUser.favs.includes(a.t);
             g.innerHTML += `<div class="card">
                 <img src="${a.i}" onclick="openPlayer('${a.fbId}')">
@@ -203,6 +227,7 @@
         document.querySelectorAll('#sec-admin input, #sec-admin textarea').forEach(e => e.value = '');
     }
 
+    // ПЛЕЕР И ЧАТ
     function openPlayer(fbId) {
         activeAnimeId = fbId;
         const a = animeDB.find(x => x.fbId === fbId);
@@ -213,9 +238,7 @@
         a.vids.forEach((link, i) => {
             bar.innerHTML += `<button class="btn-mini" onclick="setVid('${link}')">Серия ${i+1}</button>`;
         });
-        setVid(a.vids[0]);
-
-        // ЗАГРУЗКА ЧАТА ДЛЯ ЭТОГО АНИМЕ
+        setVid(a.vids[0]); // Запуск 1 серии
         loadChat(fbId);
     }
 
@@ -232,12 +255,13 @@
 
     function sendMsg() {
         const inp = document.getElementById('chatInput');
-        if(!inp.value.trim() || !activeAnimeId) return;
+        if(!inp.value.trim()) return;
         db.ref('chats/' + activeAnimeId).push({ user: currentUser.name, text: inp.value });
         inp.value = '';
     }
 
     function setVid(url) { document.getElementById('videoArea').innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`; }
+    
     function closePlayer() { 
         document.getElementById('playerModal').style.display = 'none'; 
         document.getElementById('videoArea').innerHTML = '';
@@ -257,10 +281,11 @@
         const idx = currentUser.favs.indexOf(title);
         idx === -1 ? currentUser.favs.push(title) : currentUser.favs.splice(idx, 1);
         localStorage.setItem('p_session', JSON.stringify(currentUser));
-        showSection('main');
+        showSection(document.getElementById('sec-favs').style.display === 'grid' ? 'favs' : 'main');
     }
 
     function logout() { localStorage.removeItem('p_session'); location.reload(); }
+    
     function updateName() {
         const n = document.getElementById('editName').value.trim();
         if(!n) return; currentUser.name = n;
