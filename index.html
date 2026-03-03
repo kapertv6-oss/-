@@ -3,193 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AnimeZen</title>
+<title>AnimeZen Portal</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
 <style>
-body{
-background: radial-gradient(circle at 20% 30%, #1a0033, #0a0a0f 70%);
-color:#fff;
-font-family:Inter,sans-serif;
-overflow-x:hidden;
-}
-
-body::before{
-content:"";
-position:fixed;
-top:-40%;
-left:-40%;
-width:180%;
-height:180%;
-background:radial-gradient(circle,#7c3aed33 0%,transparent 60%);
-animation:rotate 25s linear infinite;
-z-index:-1;
-}
-@keyframes rotate{
-0%{transform:rotate(0deg)}
-100%{transform:rotate(360deg)}
-}
-
-.glass{
-background:rgba(20,20,30,.6);
-backdrop-filter:blur(20px);
-border-bottom:1px solid rgba(255,255,255,.05);
-}
-
-.anime-card{
-transition:.4s cubic-bezier(.2,.8,.2,1);
-}
-.anime-card:hover{
-transform:scale(1.07);
-box-shadow:0 20px 40px rgba(124,58,237,.4);
-}
-
-.modal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.85);
-backdrop-filter:blur(20px);
-align-items:center;
-justify-content:center;
-}
-.modal.active{
-display:flex;
-animation:fade .3s ease;
-}
-@keyframes fade{
-from{opacity:0}
-to{opacity:1}
-}
-
-input, textarea{
-background:#1e1e2a;
-outline:none;
-}
-
-button{
-transition:.3s;
-}
-button:hover{
-transform:scale(1.05);
-}
+body{background: radial-gradient(circle at 20% 30%, #1a0033, #0a0a0f 70%);color:#fff;font-family:Inter,sans-serif;overflow-x:hidden;}
+body::before{content:"";position:fixed;top:-40%;left:-40%;width:180%;height:180%;background:radial-gradient(circle,#7c3aed33 0%,transparent 60%);animation:rotate 25s linear infinite;z-index:-1;}
+@keyframes rotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.glass{background:rgba(20,20,30,.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05);}
+.anime-card{transition:.4s cubic-bezier(.2,.8,.2,1);}
+.anime-card:hover{transform:scale(1.05);box-shadow:0 20px 40px rgba(124,58,237,.4);}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s ease;}
+.modal.active{opacity:1;pointer-events:auto;}
+.player-box{transform:scale(.8);opacity:0;transition:all .35s cubic-bezier(.2,.8,.2,1);}
+.modal.active .player-box{transform:scale(1);opacity:1;}
+.fade-box{transform:translateY(30px);opacity:0;transition:.3s ease;}
+.modal.active .fade-box{transform:translateY(0);opacity:1;}
+input, textarea{background:#1e1e2a;outline:none;}
+button{transition:.3s;}button:hover{transform:scale(1.05);}
 </style>
 </head>
 <body>
 
-<header class="glass fixed top-0 w-full z-50 px-8 py-4 flex justify-between items-center">
-<div class="text-2xl font-black tracking-wider">
-<span class="text-purple-400">ANIME</span>ZEN
-</div>
-
-<div class="flex items-center gap-4">
-<input id="searchInput" type="text" placeholder="Поиск..." class="px-4 py-2 rounded-xl text-sm">
-
-<button id="adminBtn" onclick="toggleModal('adminModal')" class="hidden bg-purple-600 px-4 py-2 rounded-xl text-sm">
-Админ
-</button>
-
-<button id="authBtn" onclick="toggleModal('authModal')" class="bg-purple-600 px-4 py-2 rounded-xl text-sm">
-Войти
-</button>
-
-<button id="logoutBtn" onclick="logout()" class="hidden bg-red-600 px-4 py-2 rounded-xl text-sm">
-Выйти
-</button>
+<header class="glass fixed top-0 w-full z-50 px-4 md:px-8 py-3 md:py-4 flex flex-wrap md:flex-nowrap justify-between items-center gap-3">
+<div class="text-xl md:text-2xl font-black tracking-wider"><span class="text-purple-400">ANIME</span>ZEN</div>
+<div class="flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-4 w-full md:w-auto justify-end">
+<input id="searchInput" type="text" placeholder="Поиск..." class="px-3 py-2 rounded-xl text-sm w-full md:w-48">
+<button id="adminBtn" onclick="toggleModal('adminModal')" class="hidden bg-purple-600 px-3 py-2 rounded-xl text-sm">Админ</button>
+<button id="authBtn" onclick="toggleModal('authModal')" class="bg-purple-600 px-3 py-2 rounded-xl text-sm">Войти</button>
+<button id="logoutBtn" onclick="logout()" class="hidden bg-red-600 px-3 py-2 rounded-xl text-sm">Выйти</button>
+<button id="profileBtn" onclick="toggleModal('profileModal')" class="hidden bg-blue-600 px-3 py-2 rounded-xl text-sm">Профиль</button>
 </div>
 </header>
 
-<section class="pt-40 pb-24 text-center">
-<h1 class="text-6xl font-black bg-gradient-to-r from-white to-purple-500 bg-clip-text text-transparent">
-ANIMEZEN
-</h1>
-<p class="mt-6 text-gray-400">
-Твоя личная аниме-библиотека в облаке
-</p>
+<section class="pt-36 pb-16 text-center">
+<h1 class="text-4xl md:text-6xl font-black bg-gradient-to-r from-white to-purple-500 bg-clip-text text-transparent">ANIMEZEN</h1>
+<p class="mt-4 text-gray-400 text-sm md:text-base">Твоя личная аниме-библиотека в облаке</p>
 </section>
 
-<section class="max-w-7xl mx-auto px-8 pb-20">
-<div id="animeGrid" class="grid grid-cols-2 md:grid-cols-5 gap-8"></div>
+<section class="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+<div id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-8"></div>
 </section>
 
-<!-- AUTH -->
+<!-- AUTH MODAL -->
 <div id="authModal" class="modal">
-<div class="bg-[#141420] p-10 rounded-3xl w-96">
-
-<h2 class="text-xl mb-6 text-purple-400 font-bold">Авторизация</h2>
-
+<div class="fade-box bg-[#141420] p-8 rounded-3xl w-80">
+<h2 class="text-lg mb-6 text-purple-400 font-bold">Авторизация</h2>
 <input id="email" type="email" placeholder="Email" class="w-full p-3 mb-4 rounded-xl">
 <input id="password" type="password" placeholder="Пароль" class="w-full p-3 mb-6 rounded-xl">
-
-<button onclick="login()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">
-Войти
-</button>
-
-<hr class="my-6 border-gray-700">
-
+<button onclick="login()" class="w-full bg-purple-600 py-3 rounded-xl font-bold mb-4">Войти</button>
+<hr class="my-4 border-gray-700">
 <input id="regEmail" type="email" placeholder="Email" class="w-full p-3 mb-4 rounded-xl">
 <input id="regPassword" type="password" placeholder="Пароль" class="w-full p-3 mb-6 rounded-xl">
-
-<button onclick="register()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">
-Регистрация
-</button>
-
+<button onclick="register()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">Регистрация</button>
 </div>
 </div>
 
-<!-- ADMIN -->
+<!-- ADMIN MODAL -->
 <div id="adminModal" class="modal">
-<div class="bg-[#141420] p-10 rounded-3xl w-96">
-
-<h2 class="text-xl mb-6 text-purple-400 font-bold">Добавить аниме</h2>
-
-<input id="aTitle" placeholder="Название" class="w-full p-3 mb-3 rounded-xl">
+<div class="fade-box bg-[#141420] p-8 rounded-3xl w-80">
+<h2 class="text-lg mb-6 text-purple-400 font-bold">Добавить аниме</h2>
+<input id="aTitle" placeholder="Название аниме" class="w-full p-3 mb-3 rounded-xl">
 <input id="aImg" placeholder="URL постера" class="w-full p-3 mb-3 rounded-xl">
-<input id="aFrame" placeholder="Rutube embed ссылка" class="w-full p-3 mb-6 rounded-xl">
-
-<button onclick="addAnime()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">
-Добавить
-</button>
-
+<div id="episodesContainer" class="space-y-2 mb-2"></div>
+<button onclick="addEpisodeField()" class="w-full bg-purple-600 py-2 rounded-xl mb-3">Добавить серию</button>
+<button onclick="saveAnime()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">Сохранить аниме</button>
 </div>
 </div>
 
-<!-- PLAYER -->
+<!-- PLAYER MODAL -->
 <div id="playerModal" class="modal">
-<div class="w-[80%] bg-[#141420] rounded-3xl overflow-hidden p-6">
-
-<div class="flex justify-between items-center mb-4">
-<h2 id="playerTitle" class="text-lg font-bold text-purple-400"></h2>
-
-<button onclick="closePlayer()" class="bg-red-600 px-4 py-2 rounded-xl text-sm">
-Назад
-</button>
-</div>
-
-<div class="aspect-video bg-black rounded-2xl overflow-hidden mb-6">
+<div class="player-box w-[95%] md:w-[70%] lg:w-[60%] bg-[#141420] rounded-3xl p-4 md:p-6 relative">
+<h2 id="playerTitle" class="text-base md:text-lg font-bold text-purple-400 mb-2"></h2>
+<div class="aspect-video bg-black rounded-2xl overflow-hidden relative mb-2">
 <iframe id="playerFrame" class="w-full h-full"></iframe>
+<button onclick="closePlayer()" class="absolute bottom-3 right-3 bg-red-600 px-3 py-2 rounded-xl text-sm z-10">Назад</button>
 </div>
-
-<h3 class="text-purple-400 mb-3 font-bold">Комментарии</h3>
-
-<div id="commentsList" class="space-y-3 max-h-40 overflow-y-auto mb-4"></div>
-
+<div class="flex items-center gap-3 mb-2">
+<button id="likeBtn" onclick="toggleLike(currentAnimeKey)" class="bg-red-600 px-3 py-1 rounded-xl text-sm">❤</button>
+<div id="likesCount" class="text-sm text-gray-300">0</div>
+<div id="ratingContainer" class="flex gap-1"></div>
+</div>
+<h3 class="text-purple-400 mb-2 font-bold text-sm md:text-base">Комментарии</h3>
+<div id="commentsList" class="space-y-2 max-h-32 md:max-h-40 overflow-y-auto mb-3"></div>
 <div id="commentForm" class="hidden">
-<textarea id="commentText" class="w-full p-3 rounded-xl mb-3" placeholder="Написать комментарий..."></textarea>
-<button onclick="addComment()" class="bg-purple-600 px-4 py-2 rounded-xl">
-Отправить
-</button>
+<textarea id="commentText" class="w-full p-2 md:p-3 rounded-xl mb-2 text-sm" placeholder="Написать комментарий..."></textarea>
+<button onclick="addComment()" class="bg-purple-600 px-4 py-2 rounded-xl text-sm">Отправить</button>
+</div>
+<p id="loginNotice" class="text-gray-400 text-xs hidden">Войдите, чтобы оставить комментарий</p>
+</div>
 </div>
 
-<p id="loginNotice" class="text-gray-400 text-sm hidden">
-Войдите, чтобы оставить комментарий
-</p>
-
+<!-- PROFILE MODAL -->
+<div id="profileModal" class="modal">
+<div class="fade-box bg-[#141420] p-6 rounded-3xl w-80">
+<h2 class="text-lg mb-4 text-blue-400 font-bold">Профиль</h2>
+<img id="profileAvatar" src="" class="w-20 h-20 rounded-full mb-3">
+<input id="nickname" placeholder="Никнейм" class="w-full p-3 mb-3 rounded-xl">
+<input type="file" id="avatarFile" class="mb-3">
+<button onclick="saveProfile()" class="w-full bg-blue-600 py-3 rounded-xl mb-3">Сохранить</button>
+<div id="achievements" class="text-sm text-purple-400 space-y-1"></div>
+<div id="levelDisplay" class="text-sm text-green-400 mt-2"></div>
 </div>
 </div>
 
@@ -203,136 +122,158 @@ const firebaseConfig = {
   messagingSenderId: "213401429170",
   appId: "1:213401429170:web:a73c7cd2790586d92315ab"
 };
-
 firebase.initializeApp(firebaseConfig);
-
 const auth=firebase.auth();
 const db=firebase.database();
+const storage=firebase.storage();
 const ADMIN="rdzaurov093@gmail.com";
 
 let currentAnimeKey=null;
+let currentUserId=null;
+let episodes = [];
 
 auth.onAuthStateChanged(user=>{
 if(user){
+currentUserId=user.uid;
 authBtn.classList.add("hidden");
 logoutBtn.classList.remove("hidden");
-if(user.email===ADMIN){
-adminBtn.classList.remove("hidden");
-}
+profileBtn.classList.remove("hidden");
+if(user.email===ADMIN) adminBtn.classList.remove("hidden");
 }else{
+currentUserId=null;
 authBtn.classList.remove("hidden");
 logoutBtn.classList.add("hidden");
+profileBtn.classList.add("hidden");
 adminBtn.classList.add("hidden");
 }
+loadAnimeGrid();
 });
 
-function login(){
-auth.signInWithEmailAndPassword(email.value,password.value)
-.then(()=>toggleModal('authModal'))
-.catch(e=>alert(e.message));
+function login(){auth.signInWithEmailAndPassword(email.value,password.value).then(()=>toggleModal('authModal')).catch(e=>alert(e.message));}
+function register(){auth.createUserWithEmailAndPassword(regEmail.value,regPassword.value).then(()=>{regEmail.value="";regPassword.value="";toggleModal('authModal');}).catch(e=>alert(e.message));}
+function logout(){auth.signOut();}
+
+function addEpisodeField(){
+  const div = document.createElement('div');
+  div.innerHTML = `<input placeholder="Название серии" class="w-full p-2 rounded-xl mb-1 episodeTitle"><input placeholder="Embed ссылка" class="w-full p-2 rounded-xl mb-2 episodeFrame">`;
+  episodesContainer.appendChild(div);
 }
 
-function register(){
-auth.createUserWithEmailAndPassword(regEmail.value,regPassword.value)
-.then(()=>{
-alert("Аккаунт создан!");
-regEmail.value="";
-regPassword.value="";
-toggleModal('authModal');
-})
-.catch(e=>alert(e.message));
+function saveAnime(){
+  const animeObj = {
+    title:aTitle.value,
+    img:aImg.value,
+    episodes:Array.from(episodesContainer.querySelectorAll('div')).map(d=>({title:d.querySelector('.episodeTitle').value,frame:d.querySelector('.episodeFrame').value})),
+    likes:{},
+    rating:{}
+  };
+  db.ref("animeList").push(animeObj);
+  toggleModal('adminModal');
 }
 
-function logout(){ auth.signOut(); }
-
-function addAnime(){
-db.ref("animeList").push({
-title:aTitle.value,
-img:aImg.value,
-frame:aFrame.value
-});
-toggleModal('adminModal');
+function loadAnimeGrid(){
+  db.ref("animeList").on("value",snap=>{
+    animeGrid.innerHTML="";
+    const data=snap.val();
+    if(!data) return;
+    Object.entries(data).reverse().forEach(([key,item])=>{
+      animeGrid.innerHTML+=`
+      <div class="anime-card cursor-pointer relative" onclick="openPlayerWithEpisodes('${key}')">
+      <img src="${item.img}" class="rounded-2xl">
+      <div class="absolute bottom-0 p-2 bg-gradient-to-t from-black to-transparent w-full rounded-b-2xl text-sm">${item.title}</div>
+      </div>`;
+    });
+  });
 }
 
-db.ref("animeList").on("value",snap=>{
-animeGrid.innerHTML="";
-const data=snap.val();
-if(!data) return;
-
-Object.entries(data).reverse().forEach(([key,item])=>{
-animeGrid.innerHTML+=`
-<div class="anime-card cursor-pointer relative"
-onclick="openPlayer('${item.frame}','${key}','${item.title}')">
-<img src="${item.img}" class="rounded-2xl">
-<div class="absolute bottom-0 p-3 bg-gradient-to-t from-black to-transparent w-full rounded-b-2xl">
-${item.title}
-</div>
-</div>`;
-});
-});
-
-function openPlayer(url,key,title){
-currentAnimeKey=key;
-playerFrame.src=url;
-playerTitle.innerText=title;
-loadComments();
-
-if(auth.currentUser){
-commentForm.classList.remove("hidden");
-loginNotice.classList.add("hidden");
-}else{
-commentForm.classList.add("hidden");
-loginNotice.classList.remove("hidden");
+function openPlayerWithEpisodes(key){
+  currentAnimeKey=key;
+  db.ref(`animeList/${key}`).once('value',snap=>{
+    const anime=snap.val();
+    playerTitle.innerText=anime.title;
+    if(anime.episodes && anime.episodes.length>0){
+      playerFrame.src=anime.episodes[0].frame; // запускаем первую серию
+    }
+    loadLikesAndRating();
+    loadComments();
+    if(auth.currentUser){commentForm.classList.remove("hidden");loginNotice.classList.add("hidden");}
+    else{commentForm.classList.add("hidden");loginNotice.classList.remove("hidden");}
+    toggleModal('playerModal');
+  });
 }
 
-toggleModal('playerModal');
-}
+function closePlayer(){playerFrame.src="";toggleModal('playerModal');}
 
-function closePlayer(){
-playerFrame.src="";
-toggleModal('playerModal');
-}
+function toggleModal(id){document.getElementById(id).classList.toggle("active");}
 
 function addComment(){
-if(!commentText.value.trim()) return;
-
-db.ref("comments/"+currentAnimeKey).push({
-user:auth.currentUser.email,
-text:commentText.value,
-date:Date.now()
-});
-
-commentText.value="";
+  if(!commentText.value.trim()) return;
+  db.ref("comments/"+currentAnimeKey).push({user:auth.currentUser.email,text:commentText.value,date:Date.now()});
+  commentText.value="";
 }
 
 function loadComments(){
-commentsList.innerHTML="";
-
-db.ref("comments/"+currentAnimeKey).on("value",snap=>{
-commentsList.innerHTML="";
-const data=snap.val();
-if(!data) return;
-
-Object.values(data).forEach(c=>{
-commentsList.innerHTML+=`
-<div class="bg-[#1e1e2a] p-3 rounded-xl">
-<div class="text-xs text-purple-400">${c.user}</div>
-<div>${c.text}</div>
-</div>`;
-});
-});
+  db.ref("comments/"+currentAnimeKey).on("value",snap=>{
+    commentsList.innerHTML="";
+    const data=snap.val();
+    if(!data) return;
+    Object.entries(data).forEach(([cid,c])=>{
+      let delBtn=c.user===auth.currentUser?.email||auth.currentUser?.email===ADMIN?`<button onclick="deleteComment('${currentAnimeKey}','${cid}')" class="text-xs text-red-400">🗑</button>`:"";
+      commentsList.innerHTML+=`<div class="bg-[#1e1e2a] p-2 rounded-xl text-sm"><div class="text-xs text-purple-400">${c.user} ${delBtn}</div><div>${c.text}</div></div>`;
+    });
+  });
 }
 
-function toggleModal(id){
-document.getElementById(id).classList.toggle("active");
+function deleteComment(animeKey,cid){db.ref(`comments/${animeKey}/${cid}`).remove();}
+
+function toggleLike(animeKey){
+  if(!auth.currentUser) return;
+  const uid=auth.currentUser.uid;
+  const ref=db.ref(`animeList/${animeKey}/likes/${uid}`);
+  ref.once('value',snap=>{snap.exists()?ref.remove():ref.set(true);loadLikesAndRating();});
+}
+
+function loadLikesAndRating(){
+  db.ref(`animeList/${currentAnimeKey}`).once('value',snap=>{
+    const anime=snap.val();
+    likesCount.innerText=anime.likes?Object.keys(anime.likes).length:0;
+    ratingContainer.innerHTML="";
+    for(let i=1;i<=5;i++){
+      const star=document.createElement('span');
+      star.innerText='★';
+      star.style.cursor='pointer';
+      star.style.color='gray';
+      star.onclick=()=>db.ref(`animeList/${currentAnimeKey}/rating/${auth.currentUser.uid}`).set(i);
+      ratingContainer.appendChild(star);
+    }
+  });
+}
+
+function saveProfile(){
+  const nicknameVal=nickname.value.trim();
+  const avatarFileVal=avatarFile.files[0];
+  if(avatarFileVal){
+    const storageRef=storage.ref('avatars/'+currentUserId);
+    storageRef.put(avatarFileVal).then(()=>storageRef.getDownloadURL().then(url=>db.ref('users/'+currentUserId).update({avatar:url,nickname:nicknameVal}).then(loadUserProfile)));
+  }else db.ref('users/'+currentUserId).update({nickname:nicknameVal}).then(loadUserProfile);
+}
+
+function loadUserProfile(){
+  db.ref('users/'+currentUserId).once('value',snap=>{
+    const u=snap.val();
+    if(!u) return;
+    profileAvatar.src=u.avatar||'';
+    nickname.value=u.nickname||'';
+    achievements.innerHTML=(u.achievements||[]).map(a=>`• ${a}`).join('<br>');
+    levelDisplay.innerText='Уровень: '+(u.level||1);
+  });
 }
 
 searchInput.addEventListener("input", e=>{
 const val=e.target.value.toLowerCase();
-document.querySelectorAll(".anime-card").forEach(card=>{
-card.style.display=card.innerText.toLowerCase().includes(val)?"block":"none";
+document.querySelectorAll(".anime-card").forEach(card=>{card.style.display=card.innerText.toLowerCase().includes(val)?"block":"none";});
 });
-});
+
 </script>
 
 </body>
